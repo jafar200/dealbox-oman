@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<network-security-config>
+    <!--
+      للتجربة المحلية فقط (http://10.0.2.2 أو IP المحلي).
+      ⚠️ للإنتاج: احذف هذا الملف من AndroidManifest أو اجعل
+      usesCleartextTraffic="false" واستخدم HTTPS فقط.
+    -->
+    <domain-config cleartextTrafficPermitted="true">
+        <domain includeSubdomains="true">10.0.2.2</domain>
+        <domain includeSubdomains="true">localhost</domain>
+        <domain includeSubdomains="true">192.168.100.27</domain>
+    </domain-config>
+</network-security-config>

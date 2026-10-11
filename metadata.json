@@ -1,0 +1,6 @@
+{
+  "name": "DealBox عُمان - حفظ النعمة",
+  "description": "منصة DealBox لحفظ النعمة في سلطنة عُمان والحد من الهدر الغذائي عبر الاستلام الذاتي المباشر للصناديق الفائضة من المتاجر والمخابز بالريال العُماني.",
+  "requestFramePermissions": ["geolocation"],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

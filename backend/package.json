@@ -1,0 +1,33 @@
+{
+  "name": "dealbox-backend",
+  "version": "1.0.0",
+  "description": "DealBox Oman - Backend REST API with Express & Mongoose",
+  "main": "src/server.js",
+  "type": "module",
+  "scripts": {
+    "start": "node src/server.js",
+    "dev": "nodemon src/server.js",
+    "bootstrap:admin": "node src/scripts/bootstrapAdmin.js",
+    "db:seed": "node src/scripts/seedDemoBoxes.js",
+    "db:seed:admin-team": "node src/scripts/seedAdminTeam.js",
+    "db:seed:store-demo": "node src/scripts/seedStoreDemo.js",
+    "db:seed:story-qa": "node src/scripts/seedStoryUiCheck.js",
+    "db:seed:marketing": "node src/scripts/seedMarketingDefaults.js"
+  },
+  "dependencies": {
+    "bcryptjs": "^2.4.3",
+    "cloudinary": "^2.11.0",
+    "cors": "^2.8.5",
+    "dotenv": "^16.4.5",
+    "express": "^4.21.2",
+    "express-rate-limit": "^8.7.1",
+    "google-auth-library": "^11.1.0",
+    "jsonwebtoken": "^9.0.2",
+    "mongoose": "^8.2.1",
+    "multer": "^2.4.0"
+  },
+  "devDependencies": {
+    "mongodb-memory-server": "^11.3.0",
+    "nodemon": "^3.1.0"
+  }
+}

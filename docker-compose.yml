@@ -1,0 +1,32 @@
+version: '3.8'
+
+services:
+  mongodb:
+    image: mongo:6.0
+    container_name: dealbox_mongo
+    restart: always
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongo-data:/data/db
+    environment:
+      MONGO_INITDB_DATABASE: dealbox_oman
+
+  backend:
+    build: ./backend
+    container_name: dealbox_backend
+    restart: always
+    ports:
+      - "5000:5000"
+    environment:
+      - PORT=5000
+      - NODE_ENV=production
+      - MONGO_URI=mongodb://mongodb:27017/dealbox_oman
+      - JWT_SECRET=dealbox_oman_secret_key_al_khoudh_2026
+      - GOOGLE_CLIENT_ID=${GOOGLE_CLIENT_ID}
+      - COMMISSION_RATE=0.15
+    depends_on:
+      - mongodb
+
+volumes:
+  mongo-data:

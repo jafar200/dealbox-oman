@@ -1,0 +1,27 @@
+# DealBox API — Render Blueprint (free plan)
+# Usage: Render Dashboard → New → Blueprint → select this repo.
+# Fill MONGO_URI (MongoDB Atlas) and FRONTEND_URL (your Vercel URL) when prompted.
+services:
+  - type: web
+    name: dealbox-api
+    runtime: node
+    rootDir: backend
+    buildCommand: npm install
+    startCommand: npm start
+    healthCheckPath: /api/health
+    plan: free
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: MONGO_URI
+        sync: false
+      - key: JWT_SECRET
+        generateValue: true
+      - key: FRONTEND_URL
+        sync: false
+      - key: CLOUDINARY_CLOUD_NAME
+        sync: false
+      - key: CLOUDINARY_API_KEY
+        sync: false
+      - key: CLOUDINARY_API_SECRET
+        sync: false
