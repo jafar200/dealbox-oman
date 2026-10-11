@@ -1,6 +1,7 @@
 import mongoose from 'mongoose';
 import Box from '../models/Box.js';
 import Store from '../models/Store.js';
+import { ENV } from '../config/env.js';
 
 /**
  * Seed demo stores + boxes for the client feed (GET /api/v1/client/boxes).
@@ -167,7 +168,7 @@ const seedDemoBoxes = async () => {
 };
 
 try {
-  await mongoose.connect('mongodb://127.0.0.1:27017/dealbox_oman');
+  await mongoose.connect(ENV.MONGO_URI, { serverSelectionTimeoutMS: 15000 });
   await seedDemoBoxes();
 } catch (error) {
   console.error('فشل تجهيز البيانات التجريبية:', error.message);

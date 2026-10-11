@@ -4,6 +4,7 @@ import Box from '../models/Box.js';
 import Store from '../models/Store.js';
 import StoreStory from '../models/StoreStory.js';
 import User from '../models/User.js';
+import { ENV } from '../config/env.js';
 
 const email = 'qa-story-ui@example.invalid';
 const password = 'qa-story-ui-password-123';
@@ -12,7 +13,7 @@ const imageData = 'https://images.unsplash.com/photo-1509440159596-0249088772ff?
 const storeLogoUrl = 'https://lh3.googleusercontent.com/aida-public/AB6AXuBd_613A13snlgMbl0HxUuzGWg_vdTQjRwxPqvW_McuEAKGQ_ETMpLbdmO2RteBDqOXQ-4Ax3XuN1b5H4dcq0s9_BwZTRk7BMzYmkLQbxaXpH84JhL7DdJSHiaND_6mdrL2qZ1bMWchg_vFIN3IVwGVKo1VaCSntmmLkgT_7isHoWGxtUX1QpJI6KRrf5N45YO-AVFrtDO410tN3Vyplv4dEV3SaFzXqPDlih8lZrpBj3CHSTVubnGF-w';
 const HOME_STORY_REFERENCE = 'QA-HOME-UI';
 
-await mongoose.connect('mongodb://127.0.0.1:27017/dealbox_oman');
+await mongoose.connect(ENV.MONGO_URI, { serverSelectionTimeoutMS: 15000 });
 const oldStore = await Store.findOne({ crNumber: commercialNumber });
 if (oldStore) {
   await StoreStory.deleteMany({ storeId: oldStore.id });
