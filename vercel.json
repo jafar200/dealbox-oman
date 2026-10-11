@@ -4,11 +4,11 @@
   "rewrites": [
     {
       "source": "/uploads/:path*",
-      "destination": "https://dealbox-api.onrender.com/uploads/:path*"
+      "destination": "https://dealbox-oman-kbr5.onrender.com/uploads/:path*"
     },
     {
       "source": "/api/:path*",
-      "destination": "https://dealbox-api.onrender.com/api/:path*"
+      "destination": "https://dealbox-oman-kbr5.onrender.com/api/:path*"
     },
     {
       "source": "/(.*)",
