@@ -85,6 +85,16 @@ export const forgotPasswordLimiter = buildLimiter({
 });
 
 /**
+ * @desc حد لطلبات انضمام الشركاء من استمارة الموقع التسويقي (حماية من الإغراق).
+ */
+export const partnerRequestLimiter = buildLimiter({
+  windowMs: 60 * 60 * 1000,
+  limit: 5,
+  code: 'PARTNER_REQUEST_RATE_LIMIT',
+  message: 'أرسلت عدداً كبيراً من الطلبات خلال وقت قصير، حاول لاحقاً',
+});
+
+/**
  * @desc حد لمحاولات تعيين كلمة مرور جديدة (إعادة استخدام/تخمين الرموز).
  */
 export const resetPasswordLimiter = buildLimiter({

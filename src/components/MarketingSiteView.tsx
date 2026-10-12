@@ -1,6 +1,7 @@
 import React from 'react';
 import { PortalMode, MarketingSiteContent } from '../types';
 import { DEFAULT_MARKETING_CONTENT } from '../marketingDefaults';
+import { PartnerSignupModal } from './PartnerSignupModal';
 
 interface MarketingSiteViewProps {
   projectLogo?: string | null;
@@ -153,6 +154,7 @@ const ImpactCounters: React.FC<{ stats: MarketingSiteContent['impact']['stats'] 
 
 export const MarketingSiteView: React.FC<MarketingSiteViewProps> = ({ projectLogo, onNavigate, onSeoChange }) => {
   const [content, setContent] = React.useState<MarketingSiteContent>(DEFAULT_MARKETING_CONTENT);
+  const [showPartnerForm, setShowPartnerForm] = React.useState(false);
 
   /* جلب المحتوى التسويقي من الخادم (يُدار من لوحة الآدمن) */
   React.useEffect(() => {
@@ -271,7 +273,7 @@ export const MarketingSiteView: React.FC<MarketingSiteViewProps> = ({ projectLog
             </button>
             <button
               type="button"
-              onClick={() => onNavigate('portal-gate')}
+              onClick={() => setShowPartnerForm(true)}
               className="inline-flex items-center gap-2 rounded-2xl border border-white/25 bg-white/5 px-6 py-4 text-[14px] font-bold text-white backdrop-blur transition hover:bg-white/10 active:scale-95"
             >
               <span className="material-symbols-outlined text-[18px]">storefront</span>
@@ -549,7 +551,7 @@ export const MarketingSiteView: React.FC<MarketingSiteViewProps> = ({ projectLog
 
               <button
                 type="button"
-                onClick={() => onNavigate('portal-gate')}
+                onClick={() => setShowPartnerForm(true)}
                 className="group mt-9 inline-flex items-center gap-2 rounded-2xl bg-[#006948] px-7 py-4 text-[15px] font-black text-white shadow-lg shadow-[#006948]/20 transition hover:bg-[#00855d] hover:shadow-xl hover:shadow-[#006948]/30 active:scale-95"
               >
                 {content.partners.ctaText}
@@ -676,6 +678,9 @@ export const MarketingSiteView: React.FC<MarketingSiteViewProps> = ({ projectLog
           {content.footer.copyright}
         </div>
       </footer>
+
+      {/* استمارة تسجيل شريك — تصل للإدارة للتواصل مع مقدم الطلب */}
+      {showPartnerForm && <PartnerSignupModal onClose={() => setShowPartnerForm(false)} />}
     </div>
   );
 };

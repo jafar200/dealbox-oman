@@ -28,6 +28,10 @@ import {
 import { updateStore, updateStoreStorySettings } from '../controllers/adminController.js';
 import { uploadStoreImage } from '../controllers/storeController.js';
 import {
+  getPartnerRequests,
+  updatePartnerRequest,
+} from '../controllers/partnerRequestController.js';
+import {
   getAdminStories,
   getStorySettings,
   reviewStoreStory,
@@ -50,6 +54,10 @@ router.post('/stores', requirePermissions('stores'), createStoreWithManager);
 router.patch('/stores/:id', requirePermissions('stores'), updateStore);
 router.post('/stores/:id/logo', requirePermissions('stores'), uploadStoreImage);
 router.patch('/stores/:id/story-settings', requirePermissions('stores'), updateStoreStorySettings);
+
+// طلبات انضمام الشركاء (من استمارة الموقع) — صلاحية المتاجر
+router.get('/partner-requests', requirePermissions('stores'), getPartnerRequests);
+router.patch('/partner-requests/:id', requirePermissions('stores'), updatePartnerRequest);
 
 // الحجوزات والتقارير الفورية — صلاحية المستخدمين/التقارير
 router.get('/users-analytics', requirePermissions('users'), getUsersAnalytics);

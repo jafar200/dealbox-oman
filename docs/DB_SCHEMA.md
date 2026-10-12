@@ -458,6 +458,7 @@ FRONTEND_URL=https://yourdomain.com
 | `/admin/stories`, `/admin/stories/:id/review` | stories |
 | `/admin/support-messages` | reports |
 | `/admin/loyalty`, `/admin/announcement`, `/admin/story-settings`, `/admin/password-reset-settings`, `/admin/team*` | settings |
+| `/admin/partner-requests`, `/admin/partner-requests/:id` | stores |
 
 ### تهيئة الفريق التجريبي
 
@@ -539,3 +540,37 @@ etPayoutPendingOmr (بعد خصم 15%) |
 - **التحقق:** الرسوم 0–1000 ر.ع، الفترة إحدى القيم الثلاث.
 - **الأثر:** إنشاء القصة يستخدم إعداد المتجر أولاً (ثم العالمية)، ويُخزَّن eeOmr وeePeriod في StoreStory.
 - **لوحة المتجر:** GET /api/v1/store/story-settings لمسؤول المتجر يعيد إعدادات متجره (storyPromotionFeeOmr, storyFeePeriod, storyEnabled).
+
+## 16. طلبات انضمام الشركاء (PartnerRequest + API)
+
+استمارة «سجّل مخبزك/مقهىك معنا» في الموقع التسويقي (قسم المتاجر + زر الهيدر) ترسل
+طلب انضمام يراجعه الآدمن من قسم «طلبات انضمام الشركاء» (صلاحية stores) للتواصل
+مع مقدم الطلب هاتفياً وتحديث حالته.
+
+### التخزين (PartnerRequest)
+
+| الحقل | النوع | الوصف |
+|---|---|---|
+| ullName | String (مطلوب، ≤80) | اسم مقدم الطلب |
+| storeName | String (مطلوب، ≤80) | اسم المخبز/المقهى |
+| phone | String (مطلوب، ≥8 أرقام) | هاتف التواصل (واتساب) |
+| wilayah / rea | String | الولاية (افتراضي السيب) والمنطقة |
+| category | enum | bakery/supermarket/restaurant/cafe/produce/cooked/other |
+| 
+otes | String (≤500) | ملاحظات اختيارية |
+| status | enum | new/contacted/approved/rejected (افتراضي new) |
+
+### المسارات
+
+| المسار | الصلاحية | الوصف |
+|---|---|---|
+| POST /api/v1/partnership-requests | عام + حد 5/ساعة لكل IP | إرسال طلب انضمام (تحقق: اسم + متجر + هاتف صحيح) |
+| GET /api/v1/admin/partner-requests | stores | القائمة (الأحدث أولاً) + عداد 
+ewCount للشارة |
+| PATCH /api/v1/admin/partner-requests/:id | stores | تحديث الحالة {status} فقط |
+
+### الواجهة
+
+- الموقع: PartnerSignupModal.tsx (نموذج منبثق + رسالة نجاح) يُفتح من زرّي التسجيل.
+- الآدمن: AdminPartnerRequestsSection.tsx (فلتر حالات + أزرار تم التواصل/قبول/رفض + رابط 	el:)
+  مربوط في الشريط الجانبي (?portal=admin&section=partners) بشارة عدد الجديد.

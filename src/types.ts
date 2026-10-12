@@ -157,8 +157,24 @@ export interface TeamMember {
   isSelf: boolean;
 }
 
-export interface AdminRoleCatalogItem {
-  key: AdminRole;
+/* طلب انضمام شريك من استمارة الموقع التسويقي — يراجعه الآدمن ويتواصل مع مقدمه */
+export interface PartnerRequest {
+  id: string;
+  fullName: string;
+  storeName: string;
+  phone: string;
+  wilayah: string;
+  area: string;
+  category: string;
+  categoryLabel: string;
+  notes: string;
+  status: 'new' | 'contacted' | 'approved' | 'rejected';
+  statusLabel: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface AdminRoleCatalogItem {  key: AdminRole;
   title: string;
   shortTitle: string;
   color: string;

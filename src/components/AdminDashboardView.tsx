@@ -5,6 +5,7 @@ import { AdminPaidStoriesSection } from './AdminPaidStoriesSection';
 import { AdminLoyaltySettings } from './AdminLoyaltySettings';
 import { AdminAnnouncementSettings } from './AdminAnnouncementSettings';
 import { AdminStoresSection } from './AdminStoresSection';
+import { AdminPartnerRequestsSection } from './AdminPartnerRequestsSection';
 import { AdminPickupsSection } from './AdminPickupsSection';
 import { AdminImpactSection } from './AdminImpactSection';
 import { AdminUsersSection } from './AdminUsersSection';
@@ -44,6 +45,7 @@ interface AdminDashboardViewProps {
 type AdminSidebarNav = 
   | 'overview-dashboard'
   | 'stores-and-hubs'
+  | 'partner-requests'
   | 'pickups-and-passes'
   | 'impact-and-analytics'
   | 'users-directory'
@@ -72,6 +74,7 @@ export const AdminDashboardView: React.FC<AdminDashboardViewProps> = ({
   const NAV_PERMISSION: Record<AdminSidebarNav, AdminPermission> = {
     'overview-dashboard': 'overview',
     'stores-and-hubs': 'stores',
+    'partner-requests': 'stores',
     'pickups-and-passes': 'pickups',
     'impact-and-analytics': 'reports',
     'users-directory': 'users',
@@ -89,6 +92,7 @@ export const AdminDashboardView: React.FC<AdminDashboardViewProps> = ({
       if (s === 'settings' || s === 'roles' || s === 'system-settings') {
         requested = 'settings-and-roles';
       } else if (s === 'stores') requested = 'stores-and-hubs';
+      else if (s === 'partners' || s === 'partner-requests') requested = 'partner-requests';
       else if (s === 'pickups') requested = 'pickups-and-passes';
       else if (s === 'impact') requested = 'impact-and-analytics';
       else if (s === 'users') requested = 'users-directory';
@@ -107,6 +111,8 @@ export const AdminDashboardView: React.FC<AdminDashboardViewProps> = ({
         url.searchParams.set('section', 'settings');
       } else if (nav === 'stores-and-hubs') {
         url.searchParams.set('section', 'stores');
+      } else if (nav === 'partner-requests') {
+        url.searchParams.set('section', 'partners');
       } else if (nav === 'pickups-and-passes') {
         url.searchParams.set('section', 'pickups');
       } else if (nav === 'impact-and-analytics') {
@@ -337,6 +343,26 @@ export const AdminDashboardView: React.FC<AdminDashboardViewProps> = ({
 
   // تحليلات المستخدمين والحجوزات (GET /api/v1/admin/users-analytics)
   const [usersAnalytics, setUsersAnalytics] = useState<AdminUsersAnalyticsData | null>(null);
+
+  // عداد طلبات انضمام الشركاء الجديدة (شارة زر القسم)
+  const [partnerNewCount, setPartnerNewCount] = useState(0);
+
+  useEffect(() => {
+    if (!authToken || !hasPerm('stores')) return;
+    let isActive = true;
+    fetch('/api/v1/admin/partner-requests', { headers: { Authorization: `Bearer ${authToken}` } })
+      .then(async (response) => {
+        const result = await response.json().catch(() => null);
+        if (isActive && response.ok && result?.success) {
+          setPartnerNewCount(result.newCount || 0);
+        }
+      })
+      .catch(() => { /* تبقى الشارة مخفية عند التعذر */ });
+    return () => {
+      isActive = false;
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [authToken]);
 
   // Notifications Feed
   const [notifications, setNotifications] = useState([
@@ -713,6 +739,27 @@ export const AdminDashboardView: React.FC<AdminDashboardViewProps> = ({
               </span>
             </button>
             )}
+            {canAccess('partner-requests') && (
+            <button
+              type="button"
+              onClick={() => handleNavChange('partner-requests')}
+              className={`flex items-center justify-between px-3.5 py-2.5 rounded-xl transition-all font-semibold ${
+                activeNav === 'partner-requests'
+                  ? 'bg-[#006948] text-white shadow-xs'
+                  : 'text-stone-600 hover:bg-[#f2f3ff] hover:text-[#131b2e]'
+              }`}
+            >
+              <div className="flex items-center gap-2.5">
+                <span className="material-symbols-outlined text-[20px]">handshake</span>
+                <span>طلبات انضمام الشركاء</span>
+              </div>
+              {partnerNewCount > 0 && (
+                <span className="px-2 py-0.5 rounded-full bg-[#fea619] text-white text-[10px] font-bold">
+                  {partnerNewCount} جديد
+                </span>
+              )}
+            </button>
+            )}
 
             {canAccess('pickups-and-passes') && (
             <button
@@ -962,6 +1009,12 @@ export const AdminDashboardView: React.FC<AdminDashboardViewProps> = ({
               onNotify={onNotify}
               authToken={authToken || ''}
               onEditStore={handleEditStore}
+            />
+          ) : activeNav === 'partner-requests' && canAccess('partner-requests') ? (
+            <AdminPartnerRequestsSection
+              authToken={authToken || ''}
+              onNotify={onNotify}
+              onCountChange={setPartnerNewCount}
             />
           ) : activeNav === 'pickups-and-passes' && canAccess('pickups-and-passes') ? (
             <AdminPickupsSection
