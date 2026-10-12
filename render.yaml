@@ -6,7 +6,7 @@ services:
     name: dealbox-api
     runtime: node
     rootDir: backend
-    buildCommand: npm install && npm run db:seed && npm run db:seed:admin-team && npm run db:seed:store-demo && npm run db:seed:story-qa && npm run db:seed:marketing
+    buildCommand: npm install
     startCommand: npm start
     healthCheckPath: /api/health
     plan: free
