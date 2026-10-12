@@ -555,7 +555,7 @@ export const ClientAuthView: React.FC<ClientAuthViewProps> = ({
               <p>افتح التطبيق في Chrome أو Edge، وأضف هذا الأصل إلى Authorized JavaScript origins في Google Cloud:</p>
               <bdi dir="ltr" className="font-mono font-bold">{window.location.origin}</bdi>
             </div>
-          ) : isNativeApp && googleAuthEnabled && googleClientId ? (
+          ) : isNativeApp && googleAuthEnabled ? (
             <button
               type="button"
               onClick={startGoogleSignIn}

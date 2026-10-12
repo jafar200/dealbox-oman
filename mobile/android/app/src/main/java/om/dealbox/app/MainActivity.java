@@ -63,12 +63,17 @@ public class MainActivity extends Activity {
         @JavascriptInterface
         public void signIn(final String clientId) {
             runOnUiThread(() -> {
-                if (clientId == null || clientId.trim().isEmpty()) {
+                // نعتمد على المعرّف الوارد من الواجهة، وإن كان فارغاً نرجع لمعرّف التطبيق في strings.xml
+                String webClientId = clientId != null ? clientId.trim() : "";
+                if (webClientId.isEmpty() || webClientId.startsWith("PUT_") || webClientId.startsWith("YOUR_")) {
+                    webClientId = getString(R.string.google_web_client_id).trim();
+                }
+                if (webClientId.isEmpty() || webClientId.startsWith("PUT_") || webClientId.startsWith("YOUR_")) {
                     notifyWeb(false, "معرّف Google Client ID غير مُعدّ");
                     return;
                 }
                 GoogleSignInOptions options = new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
-                        .requestIdToken(clientId.trim())
+                        .requestIdToken(webClientId)
                         .requestEmail()
                         .build();
                 googleSignInClient = GoogleSignIn.getClient(MainActivity.this, options);

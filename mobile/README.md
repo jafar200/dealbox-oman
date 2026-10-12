@@ -80,9 +80,12 @@ mobile/
      - Package name: `om.dealbox.app`
      - SHA-1: بصمة مفتاح التوقيع (انظر أدناه)
 4. **قيم البيئة المطابقة:**
+   - في التطبيق: ضع الـ Web Client ID في `mobile/android/app/src/main/res/values/strings.xml` →
+     `google_web_client_id` (احتياطي يعمل حتى لو لم تُضبط الواجهة).
    - على **Render**: أضف `GOOGLE_CLIENT_ID` = نفس الـ Web Client ID ثم أعد النشر.
-   - على **Vercel**: أضف `VITE_GOOGLE_CLIENT_ID` = نفس القيمة (وإلا اتركها فارغة وستأتي من إعدادات الآدمن).
+   - على **Vercel**: أضف `VITE_GOOGLE_CLIENT_ID` = نفس القيمة (لواجهة المتصفح).
    - في **لوحة الآدمن ← الموقع/الإعدادات ← Google Client ID**: نفس القيمة.
+   > القيمة في `strings.xml` تكفي لعمل الزر في التطبيق؛ الباقي مطلوب لتسجيل الدخول من المتصفح.
 
 ### استخراج بصمة SHA-1
 ```powershell

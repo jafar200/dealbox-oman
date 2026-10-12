@@ -18,5 +18,16 @@
     -->
     <string name="webapp_url">https://dealbox-oman.vercel.app/?portal=intro</string>
 
+    <!--
+      معرّف عميل Google (Web application OAuth Client ID) — لتسجيل الدخول الأصلي.
+      الصقه هنا من Google Cloud Console (ينتهي بـ .apps.googleusercontent.com).
+      يُستخدم كاحتياطي إذا لم تُمرّر الواجهة قيمة، ويجب أن يطابق:
+        • GOOGLE_CLIENT_ID في خادم Render (للتحقق من الرمز)
+        • Google Client ID في لوحة الآدمن / VITE_GOOGLE_CLIENT_ID على Vercel
+      ملاحظة: يجب أيضاً إنشاء عميل OAuth من نوع Android بنفس اسم الحزمة
+      om.dealbox.app وبصمة SHA-1 لمفتاح التوقيع (انظر mobile/README.md).
+    -->
+    <string name="google_web_client_id" translatable="false">PUT_WEB_CLIENT_ID.apps.googleusercontent.com</string>
+
     <string name="webapp_offline">لا يوجد اتصال بالإنترنت.\nتحقق من الشبكة ثم حاول مجدداً.</string>
 </resources>
