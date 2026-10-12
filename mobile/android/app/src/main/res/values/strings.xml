@@ -14,7 +14,7 @@
           https://dealbox.om/?portal=client
       ═══════════════════════════════════════════════════════════
     -->
-    <string name="webapp_url">http://192.168.100.27:3000/?portal=client</string>
+    <string name="webapp_url">https://dealbox-oman.vercel.app/?portal=client</string>
 
     <string name="webapp_offline">لا يوجد اتصال بالإنترنت.\nتحقق من الشبكة ثم حاول مجدداً.</string>
 </resources>

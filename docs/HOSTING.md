@@ -63,10 +63,14 @@ mongodb+srv://<user>:<password>@cluster0.xxxxx.mongodb.net/dealbox_oman
 
 1. سجّل في [vercel.com](https://vercel.com) بحساب GitHub
 2. **Add New → Project** → اختر مستودع `dealbox-oman`
-3. **قبل النشر**: عدّل ملف `vercel.json` في المستودع واستبدل
-   `https://dealbox-api.onrender.com` برابط Render الحقيقي من الخطوة 3
-   (في الموضعين: `/uploads` و`/api`)، ثم ادفع التعديل (`git push`)
-4. في Vercel اضغط **Deploy** — سيبني تلقائياً (`npm run build` → `dist/public`)
+   - إذا ظهرت شاشة خدمات متعددة (monorepo): استورد خدمة **`app` (Vite)** فقط — الخادم يعمل على Render
+3. **قبل الضغط على Deploy**: أضف متغير البيئة (Settings تظهر بعد الاستيراد، أو من صفحة الإعداد قبل النشر):
+   - `VITE_API_URL` = رابط خدمة Render (مثل `https://dealbox-oman-kbr5.onrender.com`)
+   - `VITE_MAPBOX_TOKEN` = مفتاح خريطة Mapbox (لصفحة الخريطة في التطبيق)
+   > الواجهة تنادي الخادم مباشرة بهذا الرابط (معترض `fetch` في `src/main.tsx`)،
+   > والخادم يسمح بنطاق Vercel عبر CORS — لذلك لا تعتمد على `rewrites` في `vercel.json`
+   > (تبقى كاحتياط فقط).
+4. اضغط **Deploy** — سيبني تلقائياً (`npm run build` → `dist/public`)
 5. ستحصل على رابط مثل: `https://dealbox-oman.vercel.app`
 6. ارجع إلى Render وحدّث متغير `FRONTEND_URL` إلى رابط Vercel ثم **Manual Deploy**
 
