@@ -21,7 +21,7 @@
         android:theme="@style/Theme.DealBox"
         android:supportsRtl="true"
         android:networkSecurityConfig="@xml/network_security_config"
-        android:usesCleartextTraffic="true"
+        android:usesCleartextTraffic="false"
         tools:targetApi="35">
 
         <activity
