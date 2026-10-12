@@ -1,4 +1,5 @@
 import express from 'express';
+import cors from 'cors';
 import path from 'node:path';
 import dotenv from 'dotenv';
 import { connectDB } from './config/db.js';
@@ -13,6 +14,19 @@ import { errorHandler, notFound } from './middlewares/errorMiddleware.js';
 dotenv.config();
 
 const app = express();
+
+/* CORS — السماح لواجهة الإنتاج (Vercel) بنداء الخادم مباشرة */
+const allowedOrigins = [ENV.FRONTEND_URL, 'http://localhost:3000', 'http://localhost:5173'].filter(Boolean);
+app.use(cors({
+  origin: (origin, callback) => {
+    // طلبات بلا Origin (curl/تطبيقات الجوال) مسموحة دائماً
+    if (!origin) return callback(null, true);
+    if (allowedOrigins.includes(origin) || /\.vercel\.app$/.test(origin)) {
+      return callback(null, true);
+    }
+    return callback(null, false);
+  },
+}));
 
 /* ملفات الموقع التسويقي المرفوعة (شعار/هيدر/تحميل) */
 app.use('/uploads', express.static(path.join(process.cwd(), 'uploads')));
