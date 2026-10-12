@@ -53,6 +53,55 @@ mobile/
 
 ---
 
+## 🔐 تسجيل الدخول عبر Google داخل التطبيق (أصلي / Native)
+
+**المشكلة:** Google يحظر تسجيل الدخول داخل WebView (نافذة منبثقة + سياسة أمنية)، فيظهر الزر لكن لا يعمل.
+**الحل المطبّق:** التطبيق يستخدم **Google Sign-In الأصلي** (play-services-auth) ويمرّر رمز الهوية للواجهة عبر جسر جافاسكربت، ثم تُكمل الواجهة الدخول عبر الخادم (`/api/v1/auth/google`).
+
+### كيف يعمل (المسار)
+```
+زر Google في الموقع (ClientAuthView)
+  → window.AndroidGoogle.signIn(clientId)         ← جسر أندرويد في MainActivity.java
+  → مُنتقي حساب Google الأصلي (من النظام)
+  → idToken يُعاد للواجهة: window.__dealboxGoogleNativeToken(idToken)
+  → authenticateGoogle() → POST /api/v1/auth/google
+  → إنشاء جلسة عميل + دخول
+```
+> في المتصفح العادي يبقى المسار القديم (Google Identity Services + نافذة منبثقة) كما هو.
+
+### الإعداد المطلوب في Google Cloud Console (مرة واحدة)
+1. [console.cloud.google.com](https://console.cloud.google.com) → أنشئ مشروعاً (أو اختر الموجود).
+2. **APIs & Services → OAuth consent screen** → External → املأ اسم التطبيق والبريد → Save.
+3. **Credentials → Create credentials → OAuth client ID**:
+   - **أولاً: نوع Web application** ← هذا هو `GOOGLE_CLIENT_ID` (نفسه للخادم والواجهة).
+     - Authorized JavaScript origins: `https://dealbox-oman.vercel.app`
+     - انسخ الـ Client ID (ينتهي بـ `.apps.googleusercontent.com`).
+   - **ثانياً: نوع Android** ← لتفعيل الأصلي:
+     - Package name: `om.dealbox.app`
+     - SHA-1: بصمة مفتاح التوقيع (انظر أدناه)
+4. **قيم البيئة المطابقة:**
+   - على **Render**: أضف `GOOGLE_CLIENT_ID` = نفس الـ Web Client ID ثم أعد النشر.
+   - على **Vercel**: أضف `VITE_GOOGLE_CLIENT_ID` = نفس القيمة (وإلا اتركها فارغة وستأتي من إعدادات الآدمن).
+   - في **لوحة الآدمن ← الموقع/الإعدادات ← Google Client ID**: نفس القيمة.
+
+### استخراج بصمة SHA-1
+```powershell
+# مفتاح التطوير (للمحاكي وتجربة USB):
+& "C:\Program Files\Android\Android Studio\jbr\bin\keytool.exe" -list -v `
+  -keystore "$env:USERPROFILE\.android\debug.keystore" -alias androiddebugkey `
+  -storepass android -keypass android
+```
+انسخ قيمة **SHA1** وأضفها في خطوة «Android client ID».
+> للنسخة النهائية أضف أيضاً SHA-1 الخاص بـ **keystore الإصدار** الذي أنشأته وقت التوقيع (`Generate Signed Bundle`)، لأن بصمته تختلف.
+> إن ظهر رمز الخطأ 10 عند تسجيل الدخول فمعناه أن SHA-1 أو اسم الحزمة غير مطابق.
+
+### الملفات المعنية
+- `mobile/android/app/src/main/java/om/dealbox/app/MainActivity.java` — الجسر الأصلي `AndroidGoogle`.
+- `mobile/android/app/build.gradle` — مكتبة `play-services-auth`.
+- `src/components/ClientAuthView.tsx` — كشف الجسر `isNativeApp` وربط الأزرار.
+
+---
+
 ## 🍎 iOS (App Store)
 
 ### المتطلبات

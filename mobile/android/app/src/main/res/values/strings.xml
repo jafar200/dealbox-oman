@@ -13,8 +13,10 @@
         • إنتاج (بعد نشر الموقع على دومين حقيقي):
           https://dealbox.om/?portal=client
       ═══════════════════════════════════════════════════════════
+      افتتاحية التطبيق: يبدأ بصفحة المقدمة (intro) ثم ينتقل تلقائياً
+      لصفحة الزبون (client) عند الضغط على «ابدأ الآن» أو «تخطي».
     -->
-    <string name="webapp_url">https://dealbox-oman.vercel.app/?portal=client</string>
+    <string name="webapp_url">https://dealbox-oman.vercel.app/?portal=intro</string>
 
     <string name="webapp_offline">لا يوجد اتصال بالإنترنت.\nتحقق من الشبكة ثم حاول مجدداً.</string>
 </resources>
