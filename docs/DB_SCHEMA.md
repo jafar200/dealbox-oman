@@ -164,6 +164,29 @@
 - الواجهة تفحص المسار كل 30 ثانية (`src/App.tsx`) وتعالج عدم القراءة عبر `localStorage` بعلامة `dealbox_announcement_seen_v1` (تطابق `publishedAt`).
 - لوحة الأدمن: `src/components/AdminAnnouncementSettings.tsx` (نشر / حفظ كمسودة / إيقاف العرض).
 
+### 8.1 إشعارات Web Push للأجهزة (`PushSubscription` + API)
+
+لإيصال التنبيه العام كإشعار حقيقي في شريط إشعارات المتصفح/الهاتف (Chrome/Edge — يعمل على HTTPS أو localhost).
+
+**التخزين (`PushSubscription`)**
+| الحقل (Field) | النوع (Type) | الوصف (Description) |
+|---|---|---|
+| `endpoint` | String (unique) | عنوان اشتراك الجهاز (مفتاح فريد) |
+| `keys.p256dh` | String | مفتاح تشفير العميل |
+| `keys.auth` | String | مفتاح مصادقة الاشتراك |
+| `userAgent` | String | متصفح/جهاز الاشتراك (اختياري) |
+| `lastSeenAt` | Date | آخر تأكيد لصلاحية الاشتراك |
+
+**المسارات (عامة — بدون تسجيل دخول):**
+- `GET /api/v1/client/push/public-key` → `{ success, enabled, publicKey }` (مفتاح VAPID العام).
+- `POST /api/v1/client/push/subscribe` → يحفظ/يحدّث اشتراكاً `{ endpoint, keys: { p256dh, auth } }` (400 عند نقص البيانات).
+- `POST /api/v1/client/push/unsubscribe` → يحذف اشتراكاً `{ endpoint }`.
+
+**سلوك النشر:** عند نشر التنبيه من `PATCH /api/v1/admin/announcement` (نشر جديد فعلي فقط) يرسل الخادم إشعار Push لكل الاشتراكات، وتُحذف الاشتراكات المنتهية (404/410) تلقائياً. لا يُعطّل فشل الإشعار عملية النشر.
+
+**الواجهة:** `src/data/webPush.ts` (تسجيل `sw.js` + اشتراك/إلغاء + مزامنة) و`sw.js` في جذر المشروع (يُصدّره `vite.config.ts` لأن `publicDir` معطّل)، مع شريط تفعيل في `src/App.tsx` ومفتاح في `src/components/UserProfileView.tsx`.
+> ملاحظة: لا يعمل داخل WebView تطبيق الأندرويد (أندرويد لا يدعم Push API في WebView)؛ يحتاج متصفحاً حقيقياً.
+
 ## 9. إحصائيات الأدمن الحقيقية (`GET /api/v1/admin/analytics` — أدمن فقط)
 
 مسار يُرجع أرقامًا محسوبة مباشرة من قاعدة البيانات (أوامر `Orders` + متاجر `Stores`) بدلاً من أرقام ثابتة/وهمية. تستخدمه لوحة الأدمن العامة (`src/components/AdminDashboardView.tsx`) لعرض المبيعات اليومي/الأسبوعي والرسوم البيانية.

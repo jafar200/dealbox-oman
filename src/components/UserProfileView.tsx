@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { readClientSession } from '../data/clientSession';
+import { getWebPushStatus, isWebPushSupported, enableWebPush, disableWebPush } from '../data/webPush';
 
 interface UserProfileViewProps {
   totalBoxesSaved: number;
@@ -29,7 +30,9 @@ export const UserProfileView: React.FC<UserProfileViewProps> = ({
   onLogout,
   onProfileUpdate,
 }) => {
-  const [notificationsEnabled, setNotificationsEnabled] = useState(true);
+  const [notificationsEnabled, setNotificationsEnabled] = useState<boolean>(() => getWebPushStatus() === 'granted');
+  const [pushBusy, setPushBusy] = useState(false);
+  const pushSupported = isWebPushSupported();
   const [showSupport, setShowSupport] = useState(false);
   const [supportMessage, setSupportMessage] = useState('');
   const [supportSending, setSupportSending] = useState(false);
@@ -133,6 +136,22 @@ export const UserProfileView: React.FC<UserProfileViewProps> = ({
     const reader = new FileReader();
     reader.onload = () => typeof reader.result === 'string' && setEditPicture(reader.result);
     reader.readAsDataURL(file);
+  };
+
+  const togglePushNotifications = async (next: boolean) => {
+    if (!pushSupported || pushBusy) return;
+    setPushBusy(true);
+    try {
+      if (next) {
+        const status = await enableWebPush();
+        setNotificationsEnabled(status === 'granted');
+      } else {
+        await disableWebPush();
+        setNotificationsEnabled(false);
+      }
+    } finally {
+      setPushBusy(false);
+    }
   };
 
   const sendSupportMessage = async () => {
@@ -281,8 +300,9 @@ export const UserProfileView: React.FC<UserProfileViewProps> = ({
           <input
             type="checkbox"
             checked={notificationsEnabled}
-            onChange={(e) => setNotificationsEnabled(e.target.checked)}
-            className="w-4 h-4 accent-[#006948] cursor-pointer"
+            disabled={!pushSupported || pushBusy}
+            onChange={(e) => { void togglePushNotifications(e.target.checked); }}
+            className="w-4 h-4 accent-[#006948] cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed"
           />
         </div>
 

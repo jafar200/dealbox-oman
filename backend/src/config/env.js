@@ -35,4 +35,8 @@ export const ENV = {
   MAIL_PASS: process.env.MAIL_PASS || '',
   MAIL_FROM: process.env.MAIL_FROM || 'DealBox عُمان <no-reply@dealbox.om>',
   FRONTEND_URL: process.env.FRONTEND_URL || 'http://localhost:3000',
+  // Web Push (VAPID) — إشعارات المتصفح/الهاتف عبر Service Worker
+  VAPID_PUBLIC_KEY: process.env.VAPID_PUBLIC_KEY || '',
+  VAPID_PRIVATE_KEY: process.env.VAPID_PRIVATE_KEY || '',
+  VAPID_SUBJECT: process.env.VAPID_SUBJECT || 'mailto:no-reply@dealbox.om',
 };

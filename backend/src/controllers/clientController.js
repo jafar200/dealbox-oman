@@ -5,6 +5,7 @@ import Order from '../models/Order.js';
 import SupportMessage from '../models/SupportMessage.js';
 import PlatformSetting from '../models/PlatformSetting.js';
 import { ENV } from '../config/env.js';
+import { getVapidPublicKey, isWebPushConfigured, saveSubscription, removeSubscription } from '../utils/webPush.js';
 
 // نقطة البداية الافتراضية للمسافات: ولاية السيب (الخوض)، مسقط
 const DEFAULT_ORIGIN = { lat: 23.6139, lng: 58.1963 };
@@ -296,6 +297,56 @@ export const getPublicAnnouncement = async (req, res) => {
     });
   } catch {
     return res.status(500).json({ success: false, message: 'تعذر تحميل التنبيه العام' });
+  }
+};
+
+/**
+ * @desc VAPID public key for browser push subscriptions.
+ * @route GET /api/v1/client/push/public-key  (public)
+ */
+export const getPushPublicKey = async (req, res) => {
+  return res.status(200).json({
+    success: true,
+    enabled: isWebPushConfigured(),
+    publicKey: getVapidPublicKey(),
+  });
+};
+
+/**
+ * @desc Save a browser push subscription so the device receives the admin announcement.
+ * @route POST /api/v1/client/push/subscribe  (public)
+ */
+export const subscribePush = async (req, res) => {
+  const { endpoint, keys } = req.body || {};
+  if (!endpoint || !keys?.p256dh || !keys?.auth) {
+    return res.status(400).json({ success: false, message: 'بيانات الاشتراك غير مكتملة' });
+  }
+  try {
+    await saveSubscription({
+      endpoint,
+      keys: { p256dh: keys.p256dh, auth: keys.auth },
+      userAgent: req.get('user-agent') || '',
+    });
+    return res.status(200).json({ success: true });
+  } catch {
+    return res.status(500).json({ success: false, message: 'تعذر حفظ اشتراك الإشعارات' });
+  }
+};
+
+/**
+ * @desc Remove a browser push subscription (user turned notifications off).
+ * @route POST /api/v1/client/push/unsubscribe  (public)
+ */
+export const unsubscribePush = async (req, res) => {
+  const { endpoint } = req.body || {};
+  if (!endpoint) {
+    return res.status(400).json({ success: false, message: 'معرّف الاشتراك مطلوب' });
+  }
+  try {
+    await removeSubscription(endpoint);
+    return res.status(200).json({ success: true });
+  } catch {
+    return res.status(500).json({ success: false, message: 'تعذر إلغاء اشتراك الإشعارات' });
   }
 };
 

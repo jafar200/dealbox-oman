@@ -5,6 +5,8 @@ import SupportMessage from '../models/SupportMessage.js';
 import PlatformSetting from '../models/PlatformSetting.js';
 import Order from '../models/Order.js';
 import { getMailStatus } from '../utils/mailer.js';
+import { sendAnnouncementPush } from '../utils/webPush.js';
+import { ENV } from '../config/env.js';
 import {
   ADMIN_ROLE_KEYS,
   ADMIN_ROLE_CATALOG,
@@ -673,6 +675,20 @@ export const updateAnnouncement = async (req, res) => {
       },
       { new: true, upsert: true },
     );
+
+    if (publishNow) {
+      // إشعار الأجهزة المشتركة (Web Push) — الفشل لا يعطّل نشر التنبيه
+      try {
+        await sendAnnouncementPush({
+          title: settings.announcementTitle,
+          body: settings.announcementBody,
+          url: `${ENV.FRONTEND_URL}/?portal=client`,
+        });
+      } catch (pushError) {
+        console.warn('[DealBox] announcement push failed:', pushError?.message || pushError);
+      }
+    }
+
     return res.status(200).json({
       success: true,
       announcementTitle: settings.announcementTitle,

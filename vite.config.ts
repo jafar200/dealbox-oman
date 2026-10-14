@@ -150,8 +150,50 @@ function vitePluginManusDebugCollector(): Plugin {
   };
 }
 
-const plugins = [react(), tailwindcss(), jsxLocPlugin(), vitePluginManusRuntime(), vitePluginManusDebugCollector()];
+/**
+ * إضافة تُصدّر ملفات ثابتة يحتاجها Web Push على جذر الموقع:
+ * - sw.js: Service Worker لاستقبال الإشعارات وعرضها.
+ * - push-icon.svg: أيقونة الإشعار.
+ * لا يمكن استخدام مجلد public لأن publicDir مُعطّل في هذا المشروع.
+ */
+function vitePluginDealboxStaticFiles(): Plugin {
+  const files: Array<{ url: string; file: string; type: string }> = [
+    { url: "/sw.js", file: path.resolve(PROJECT_ROOT, "sw.js"), type: "application/javascript; charset=utf-8" },
+    { url: "/push-icon.svg", file: path.resolve(PROJECT_ROOT, "push-icon.svg"), type: "image/svg+xml" },
+  ];
 
+  return {
+    name: "dealbox-static-files",
+    configureServer(server: ViteDevServer) {
+      server.middlewares.use((req, res, next) => {
+        const url = (req.url || "").split("?")[0];
+        const match = files.find((f) => f.url === url);
+        if (!match) return next();
+        try {
+          const code = fs.readFileSync(match.file, "utf-8");
+          res.setHeader("Content-Type", match.type);
+          res.setHeader("Cache-Control", "no-cache");
+          if (match.url === "/sw.js") res.setHeader("Service-Worker-Allowed", "/");
+          res.end(code);
+        } catch {
+          next();
+        }
+      });
+    },
+    generateBundle() {
+      for (const f of files) {
+        try {
+          const source = fs.readFileSync(f.file, "utf-8");
+          this.emitFile({ type: "asset", fileName: f.url.replace(/^\//, ""), source });
+        } catch {
+          this.warn(`[dealbox] missing static file: ${f.file}`);
+        }
+      }
+    },
+  };
+}
+
+const plugins = [react(), tailwindcss(), jsxLocPlugin(), vitePluginManusRuntime(), vitePluginManusDebugCollector(), vitePluginDealboxStaticFiles()];
 export default defineConfig({
   plugins,
   resolve: {

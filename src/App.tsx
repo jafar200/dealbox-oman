@@ -29,6 +29,7 @@ import { INITIAL_DEAL_BOXES } from './data/mockBaskets';
 import { fetchDealBoxes } from './data/boxesApi';
 import { createOrder, fetchMyOrders } from './data/ordersApi';
 import { ClientSession, clearClientSession, readClientSession } from './data/clientSession';
+import { getWebPushStatus, isWebPushSupported, enableWebPush, syncWebPushSubscription, WebPushStatus } from './data/webPush';
 import { ApprovedStoreStory, StoreStoryDetailModal } from './components/StoreStoryDetailModal';
 import { DealBoxItem, StoreStory, Reservation, ActiveNavTab, BasketCategory, PortalMode } from './types';
 import { loadProjectLogo, saveProjectLogo } from './logoStorage';
@@ -222,6 +223,14 @@ export default function App() {
     return null;
   });
 
+  // حالة إشعارات المتصفح (Web Push): unsupported/default/granted/denied
+  const [pushStatus, setPushStatus] = useState<WebPushStatus>(() => getWebPushStatus());
+  // عرض شريط «تفعيل إشعارات الهاتف» عندما يكون الإذن لم يُطلب بعد
+  const [pushPromptDismissed, setPushPromptDismissed] = useState<boolean>(() => {
+    if (typeof window !== 'undefined') return localStorage.getItem('dealbox_push_prompt_dismissed_v1') === '1';
+    return false;
+  });
+
   // Project Logo State (synchronized with localStorage)
   const [projectLogo, setProjectLogo] = useState<string | null>(() => {
     if (typeof window !== 'undefined') {
@@ -275,6 +284,25 @@ export default function App() {
       window.clearInterval(timer);
     };
   }, []);
+
+  // مزامنة اشتراك Web Push عند فتح التطبيق (إن كان الإذن ممنوحاً مسبقاً)
+  useEffect(() => {
+    if (getWebPushStatus() === 'granted') {
+      void syncWebPushSubscription();
+    }
+  }, []);
+
+  // تفعيل إشعارات الهاتف (Web Push) — يُستدعى من تفاعل المستخدم
+  const handleEnablePush = async () => {
+    const status = await enableWebPush();
+    setPushStatus(status);
+    return status;
+  };
+
+  const dismissPushPrompt = () => {
+    try { localStorage.setItem('dealbox_push_prompt_dismissed_v1', '1'); } catch { /* ignore */ }
+    setPushPromptDismissed(true);
+  };
 
   // تعليم التنبيه العام كمقروء عند فتح نافذة التنبيهات
   const markAnnouncementSeen = () => {
@@ -720,6 +748,50 @@ export default function App() {
                     <p className="mt-1.5 text-[11px] leading-5 text-[#3d4a42] line-clamp-2">
                       {generalAnnouncement.body}
                     </p>
+                  </div>
+                </div>
+              )}
+
+              {/* تفعيل إشعارات الهاتف (Web Push) — يظهر حتى يمنح المستخدم الإذن أو يتجاهله */}
+              {isWebPushSupported() && pushStatus === 'default' && !pushPromptDismissed && (
+                <div className="px-4 pt-2 pb-0">
+                  <div className="rounded-2xl border border-[#006948]/25 bg-white px-3.5 py-3 shadow-xs flex items-center justify-between gap-3">
+                    <div className="flex items-center gap-2 min-w-0">
+                      <span className="material-symbols-outlined text-[#006948] text-[20px] shrink-0">notifications_active</span>
+                      <div className="min-w-0">
+                        <p className="text-[12px] font-black text-[#131b2e]">فعّل إشعارات الهاتف</p>
+                        <p className="text-[10px] text-stone-500 leading-4">لتصلك التنبيهات الجديدة حتى لو كان التطبيق مغلقاً</p>
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-1.5 shrink-0">
+                      <button
+                        type="button"
+                        onClick={async () => {
+                          const status = await handleEnablePush();
+                          if (status === 'granted') showToast('تم تفعيل إشعارات الهاتف ✅');
+                          else if (status === 'denied') showToast('تم رفض الإشعارات — يمكنك تفعيلها من إعدادات المتصفح');
+                        }}
+                        className="rounded-full bg-[#006948] px-3 py-1.5 text-[10px] font-bold text-white hover:bg-[#005d3f]"
+                      >
+                        تفعيل
+                      </button>
+                      <button
+                        type="button"
+                        aria-label="إخفاء"
+                        onClick={dismissPushPrompt}
+                        className="rounded-full bg-stone-100 px-2 py-1.5 text-[10px] font-bold text-stone-500 hover:bg-stone-200"
+                      >
+                        لاحقاً
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {pushStatus === 'denied' && (
+                <div className="px-4 pt-2 pb-0">
+                  <div className="rounded-2xl border border-amber-200 bg-amber-50 px-3.5 py-2.5 text-[11px] leading-5 text-amber-800">
+                    إشعارات الهاتف مرفوضة من إعدادات المتصفح. فعّلها من أيقونة القفل بجانب العنوان ← «الإشعارات» ← «السماح».
                   </div>
                 </div>
               )}
