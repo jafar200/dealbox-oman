@@ -14,11 +14,28 @@ android {
         versionName "1.0.0"
     }
 
+    signingConfigs {
+        release {
+            // بيانات مفتاح التوقيع تُقرأ من local.properties (غير مرفوعة في git)
+            def props = new Properties()
+            def propsFile = rootProject.file('local.properties')
+            if (propsFile.exists()) {
+                propsFile.withInputStream { props.load(it) }
+            }
+            storeFile rootProject.file(props.getProperty('RELEASE_STORE_FILE', 'dealbox-release.keystore'))
+            storePassword props.getProperty('RELEASE_STORE_PASSWORD', '')
+            keyAlias props.getProperty('RELEASE_KEY_ALIAS', 'dealbox')
+            keyPassword props.getProperty('RELEASE_KEY_PASSWORD', '')
+        }
+    }
+
     buildTypes {
         release {
             minifyEnabled false
             shrinkResources false
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+            // توقيع نسخة الإنتاج — يُنتج ملف .aab الجاهز لمتجر Google Play
+            signingConfig signingConfigs.release
         }
     }
 
