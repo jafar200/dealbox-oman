@@ -207,7 +207,7 @@ export const MarketingSiteView: React.FC<MarketingSiteViewProps> = ({ projectLog
       <header className="sticky top-0 z-50 border-b border-[#e6e2f2]/70 bg-white/85 backdrop-blur-md animate-fade-in">
         <div className="mx-auto flex max-w-6xl items-center justify-between px-4 py-3 sm:px-6">
           <button type="button" onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}>
-            <BrandMark logoUrl={content.images.logoUrl} />
+            <BrandMark logoUrl={projectLogo || content.images.logoUrl} />
           </button>
 
           <nav className="hidden items-center gap-6 md:flex">
@@ -653,7 +653,7 @@ export const MarketingSiteView: React.FC<MarketingSiteViewProps> = ({ projectLog
       {/* ===== التذييل ===== */}
       <footer className="border-t border-[#e6e2f2] bg-white">
         <div className="mx-auto flex max-w-6xl flex-col items-center justify-between gap-6 px-4 py-10 sm:px-6 md:flex-row">
-          <BrandMark logoUrl={content.images.logoUrl} />
+          <BrandMark logoUrl={projectLogo || content.images.logoUrl} />
           <p className="max-w-md text-center text-[12px] leading-6 text-[#3d4a42] md:text-right">
             {content.footer.about}
           </p>
