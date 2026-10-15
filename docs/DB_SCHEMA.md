@@ -217,7 +217,7 @@
 
 | الحقل (Field) | النوع (Type) | الوصف (Description) |
 |---|---|---|
-| `projectLogoUrl` | String | رابط الشعار الدائم (Cloudinary عند التفعيل، وإلا `/uploads/branding/...`) — فارغ = الشعار الافتراضي |
+| `projectLogoUrl` | String | رابط الشعار الدائم (Backblaze B2 عند التفعيل، وإلا `/uploads/branding/...`) — فارغ = الشعار الافتراضي |
 
 **المسارات:**
 | المسار | الصلاحية | الوصف |
@@ -227,7 +227,7 @@
 | `POST /api/v1/admin/branding/logo` | `settings` | رفع شعار (`multipart: image`, ≤5MB) → `{ success, logoUrl }` |
 | `DELETE /api/v1/admin/branding/logo` | `settings` | استعادة الافتراضي (تفريغ `projectLogoUrl`) |
 
-> **احتياطي التخزين:** إذا تعذّر التخزين الخارجي (Cloudinary غير مضبوط أو فشل الرفع) يُخزَّن الشعار داخل قاعدة البيانات كـ `data:` URL (حتى 1.5 ميجابايت)، ليبقى دائماً — فقرص Render مؤقت ويُمحى عند إعادة النشر. لذلك تصغّر الواجهة الشعار إلى 256px قبل الرفع.
+> **احتياطي التخزين:** إذا تعذّر التخزين الخارجي (Backblaze B2 غير مضبوط أو فشل الرفع) يُخزَّن الشعار داخل قاعدة البيانات كـ `data:` URL (حتى 1.5 ميجابايت)، ليبقى دائماً — فقرص Render مؤقت ويُمحى عند إعادة النشر. لذلك تصغّر الواجهة الشعار إلى 256px قبل الرفع.
 
 **الواجهة:** `src/data/brandingApi.ts` (`fetchProjectBranding` / `uploadProjectBranding` / `deleteProjectBranding`)، و`src/App.tsx` يجلب الشعار من الخادم عند الإقلاع (وله الأولوية على النسخة المحلية في IndexedDB)، ويرفعه عند حفظه من `src/components/AdminSystemSettingsView.tsx`.
 > سابقاً كان الشعار يُحفظ في IndexedDB محلياً فقط، فلم يكن يظهر على الهواتف أو أي جهاز آخر.

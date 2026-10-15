@@ -118,32 +118,46 @@ npm run db:seed:marketing    # المحتوى التسويقي الافتراض�
 
 ---
 
-## الخطوة 7 (مهمة): التخزين الخارجي الدائم — Cloudinary (مجاني)
+## الخطوة 7 (مهمة): التخزين الخارجي الدائم — Backblaze B2 (مجاني)
 
 بدون هذه الخطوة، الشعارات والصور المرفوعة تُحفظ على قرص Render المؤقت وقد **تختفي**
-بعد إعادة التشغيل. Cloudinary يمنحك تخزيناً دائماً مع CDN مجاناً (25GB — بدون بطاقة بنكية).
+بعد إعادة التشغيل. Backblaze B2 يمنحك تخزيناً دائماً (10GB مجاناً — بدون بطاقة بنكية).
 
-### 1. إنشاء الحساب
-1. سجّل مجاناً في [cloudinary.com](https://cloudinary.com/users/register_free)
-2. من لوحة التحكم (Dashboard) انسخ ثلاث قيم:
-   - **Cloud name** → `CLOUDINARY_CLOUD_NAME`
-   - **API Key** → `CLOUDINARY_API_KEY`
-   - **API Secret** → اضغط Reveal وانسخه → `CLOUDINARY_API_SECRET`
+### 1. إنشاء الحساب والحاوية (Bucket)
+1. سجّل مجاناً في [backblaze.com](https://www.backblaze.com/sign-up/blob-storage)
+2. من **B2 Cloud Storage → Buckets → Add a Bucket**:
+   - اسم الحاوية: مثلاً `dealbox-oman`
+   - **Filename Prefixed with**: فارغ
+   - **Files Encryption**: Disable
+   - **Object Lock**: Disable
+   - **Public Bucket**: فعّل (أو اضبط لاحقاً من Bucket → Properties → شغّل "Public Bucket")
+3. من **App Keys → Add Application Key**: انسخ القيم:
+   - **keyID** → `B2_KEY_ID`
+   - **applicationKey** (يظهر مرة واحدة) → `B2_APPLICATION_KEY`
 
-### 2. تفعيله على Render
+### 2. القيم المطلوبة على Render
+| القيمة في Backblaze | المتغير في Render |
+|---|---|
+| Key ID | `B2_KEY_ID` |
+| Application Key | `B2_APPLICATION_KEY` |
+| اسم الحاوية | `B2_BUCKET_NAME` |
+| نقطة نهاية S3 (`https://s3.us-west-002.backblazeb2.com` — من نافذة Connect API Endpoint) | `B2_ENDPOINT` |
+| `https://f005.backblazeb2.com/file/<bucket-name>` (أو نطاقك الخاص) | `B2_PUBLIC_URL` |
+
+### 3. تفعيله على Render
 1. لوحة Render → خدمة `dealbox-api` → تبويب **Environment**
-2. أضف المتغيرات الثلاثة والصق قيمها → **Save Changes**
+2. أضف المتغيّرات الخمسة وصق قيمها → **Save Changes**
 3. ستُعاد الخدمة تلقائياً — راقب السجلات (Logs) حتى ترى:
 ```
-[DealBox Uploads] التخزين الخارجي مفعّل (Cloudinary)
+[DealBox Uploads] تخزين B2 مفعّل
 ```
 
-### 3. كيف يعمل؟
-- **مفعّل**: كل صورة تُرفع إلى Cloudinary فوراً ويُحفظ رابط CDN دائم
-  (`https://res.cloudinary.com/...`) في قاعدة البيانات — يبقى للأبد ويعمل من أي مكان
+### 4. كيف يعمل؟
+- **مفعّل**: كل صورة تُرفع إلى B2 فوراً ويُحفظ رابط دائم
+  (`https://f005.backblazeb2.com/file/...`) في قاعدة البيانات — يبقى للأبد ويعمل من أي مكان
 - **غير مفعّل** (التطوير المحلي): يبقى الرفع على القرص المحلي كما كان — لا شيء يتغير عندك
 - الواجهة تعرض الرابطين بنفس الطريقة — **لا حاجة لأي تعديل في التطبيق**
 
-### 4. التحقق
+### 5. التحقق
 ارفع شعار متجر من لوحة الآدمن → يجب أن يبدأ الرابط المحفوظ بـ
-`https://res.cloudinary.com/` بدل `/uploads/...`.
+`https://f005.backblazeb2.com/file/` (أو `B2_PUBLIC_URL`) بدل `/uploads/...`.

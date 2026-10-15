@@ -21,11 +21,16 @@ services:
         sync: false
       - key: GOOGLE_CLIENT_ID
         sync: false
-      - key: CLOUDINARY_CLOUD_NAME
+      # Backblaze B2 (التخزين الخارجي الدائم للصور)
+      - key: B2_KEY_ID
         sync: false
-      - key: CLOUDINARY_API_KEY
+      - key: B2_APPLICATION_KEY
         sync: false
-      - key: CLOUDINARY_API_SECRET
+      - key: B2_BUCKET_NAME
+        sync: false
+      - key: B2_ENDPOINT
+        sync: false
+      - key: B2_PUBLIC_URL
         sync: false
       - key: VAPID_PUBLIC_KEY
         sync: false

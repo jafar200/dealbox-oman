@@ -1,6 +1,5 @@
 import multer from 'multer';
 import fs from 'node:fs';
-import { isCloudinaryEnabled, uploadBufferToCloudinary } from '../config/cloudinary.js';
 import { isB2Enabled } from '../config/b2.js';
 import { uploadBufferToB2 } from './uploadToB2.js';
 
@@ -12,8 +11,8 @@ export const ALLOWED_IMAGE_MIMES = [
   'image/webp',
   'image/svg+xml',
 ];
-export const MAX_IMAGE_BYTES = 5 * 1024 * 1024; // 5 ????????
-export const IMAGE_MIME_ERROR = '??? ?????? ??? ????? � ?????? PNG ?? JPG ?? GIF ?? WebP ?? SVG';
+export const MAX_IMAGE_BYTES = 5 * 1024 * 1024; // 5 ميغابايت
+export const IMAGE_MIME_ERROR = 'نوع الصورة غير مدعوم — استخدم PNG أو JPG أو GIF أو WebP أو SVG';
 
 const imageFileFilter = (_req, file, cb) => {
   if (!ALLOWED_IMAGE_MIMES.includes(file.mimetype)) {
@@ -24,13 +23,12 @@ const imageFileFilter = (_req, file, cb) => {
 };
 
 /**
- * ???? ??? ?????:
- * - ??? ????? B2 ? ????? ???? ?? ??????? ?? ??? ??? B2
- * - ??? ??? ??????? ????? Cloudinary
- * - ???? ? ????? ??? ????? ?????? (???????)
+ * وسيط رفع موحّد:
+ * - عند تفعيل Backblaze B2 → تخزين مؤقت في الذاكرة ثم رفع دائم إلى B2.
+ * - بدونه → تخزين على القرص المحلي (وضع التطوير فقط؛ قرص Render مؤقت).
  */
 export const createImageUploader = ({ diskDir, filenameFn }) => {
-  const storage = isB2Enabled() || isCloudinaryEnabled()
+  const storage = isB2Enabled()
     ? multer.memoryStorage()
     : multer.diskStorage({
       destination: (_req, _file, cb) => {
@@ -48,18 +46,19 @@ export const createImageUploader = ({ diskDir, filenameFn }) => {
 };
 
 /**
- * ????? ????? ??????? ??? ???? ???
+ * تحويل الملف المرفوع إلى رابط دائم (B2) أو رابط محلي (تطوير).
  */
 export const resolveUploadedUrl = async (file, { cloudFolder, localPrefix, key }) => {
-  if (!file) throw new Error('?? ??? ?????? ????');
+  if (!file) throw new Error('لم يتم اختيار صورة');
   if (file.buffer) {
     if (isB2Enabled()) {
-      return uploadBufferToB2(file.buffer, { folder: cloudFolder || 'dealbox', key });
+      return uploadBufferToB2(file.buffer, {
+        folder: cloudFolder || 'dealbox',
+        key,
+        mimetype: file.mimetype,
+      });
     }
-    if (isCloudinaryEnabled()) {
-      return uploadBufferToCloudinary(file.buffer, { folder: cloudFolder || 'dealbox' });
-    }
-    throw new Error('?? ???? ????? ????? ??????');
+    throw new Error('لا يوجد تخزين خارجي مُفعّل (Backblaze B2)');
   }
   return `${localPrefix}/${file.filename}`;
 };

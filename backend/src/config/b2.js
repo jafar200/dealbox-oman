@@ -14,9 +14,9 @@ export const isB2Enabled = () =>
   Boolean(B2_KEY_ID && B2_APPLICATION_KEY && B2_BUCKET_NAME && B2_ENDPOINT);
 
 if (isB2Enabled()) {
-  console.log('[DealBox Uploads] ????? B2 ?????');
+  console.log('[DealBox Uploads] التخزين الخارجي مفعّل (Backblaze B2)');
 } else {
-  console.log('[DealBox Uploads] ????? B2 ??? ????? � ???????? ?????? ??????');
+  console.log('[DealBox Uploads] التخزين الخارجي غير مضبوط (Backblaze B2) — الرفع على القرص المحلي');
 }
 
 export const b2Config = {

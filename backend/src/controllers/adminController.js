@@ -806,7 +806,7 @@ export const uploadBrandingLogo = (req, res) => {
         localPrefix: '/uploads/branding',
       });
     } catch {
-      // التخزين الخارجي (Cloudinary) غير متاح → نكمل بالاحتياطي أدناه.
+      // التخزين الخارجي (Backblaze B2) غير متاح → نكمل بالاحتياطي أدناه.
       url = '';
     }
 
