@@ -20,6 +20,8 @@ const LOYALTY_KEY = 'loyalty';
 const ANNOUNCEMENT_KEY = 'announcement';
 const PASSWORD_RESET_KEY = 'password-reset';
 const BRANDING_KEY = 'branding';
+// الحد الأقصى لحجم الشعار عند تخزينه داخل قاعدة البيانات (احتياطي بدون تخزين خارجي).
+const MAX_INLINE_LOGO_BYTES = 1_500_000;
 
 /**
  * Super Admin Controller for DealBox Sultanate of Oman
@@ -797,14 +799,31 @@ export const uploadBrandingLogo = (req, res) => {
       return res.status(400).json({ success: false, message: 'لم يتم اختيار صورة' });
     }
 
-    let url;
+    let url = '';
     try {
       url = await resolveUploadedUrl(req.file, {
         cloudFolder: 'dealbox/branding',
         localPrefix: '/uploads/branding',
       });
     } catch {
-      return res.status(500).json({ success: false, message: 'تعذر رفع الصورة إلى التخزين الخارجي' });
+      // التخزين الخارجي (Cloudinary) غير متاح → نكمل بالاحتياطي أدناه.
+      url = '';
+    }
+
+    // احتياطي: تخزين الشعار داخل قاعدة البيانات (data URL) ليبقى دائماً حتى
+    // بدون تخزين خارجي أو عند إعادة نشر الخادم (قرص Render مؤقت).
+    if (!url && req.file.buffer) {
+      if (req.file.buffer.length > MAX_INLINE_LOGO_BYTES) {
+        return res.status(400).json({
+          success: false,
+          message: 'حجم الصورة كبير — استخدم صورة أصغر (أقل من 1.5 ميجابايت)',
+        });
+      }
+      url = `data:${req.file.mimetype};base64,${req.file.buffer.toString('base64')}`;
+    }
+
+    if (!url) {
+      return res.status(500).json({ success: false, message: 'تعذر حفظ شعار المنظومة' });
     }
 
     try {
