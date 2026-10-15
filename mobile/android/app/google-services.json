@@ -1,0 +1,39 @@
+{
+  "project_info": {
+    "project_number": "697477474638",
+    "project_id": "food-rescue-admin-sa",
+    "storage_bucket": "food-rescue-admin-sa.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:697477474638:android:4d28516549b97704d6161f",
+        "android_client_info": {
+          "package_name": "om.dealbox.app"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "697477474638-hq3pr5dg147kfuikkcfil4ehbic9kse8.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCdYV5ST5qnJzINlQ8Jt64OPmA0lLKZRiA"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "697477474638-hq3pr5dg147kfuikkcfil4ehbic9kse8.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
