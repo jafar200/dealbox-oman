@@ -39,4 +39,10 @@ export const ENV = {
   VAPID_PUBLIC_KEY: process.env.VAPID_PUBLIC_KEY || '',
   VAPID_PRIVATE_KEY: process.env.VAPID_PRIVATE_KEY || '',
   VAPID_SUBJECT: process.env.VAPID_SUBJECT || 'mailto:no-reply@dealbox.om',
+  // Firebase Cloud Messaging (FCM) — إشعارات تطبيق الجوال (أندرويد/iOS) حتى لو التطبيق مغلق.
+  // تُقرأ من ملف حساب الخدمة: Firebase → Project settings → Service accounts → Generate new private key
+  FIREBASE_PROJECT_ID: process.env.FIREBASE_PROJECT_ID || '',
+  FIREBASE_CLIENT_EMAIL: process.env.FIREBASE_CLIENT_EMAIL || '',
+  // المفتاح الخاص (PEM). في متغيّرات البيئة يُكتب بسطر واحد مع \n ثم يُحوَّل لأسطر فعلية هنا.
+  FIREBASE_PRIVATE_KEY: (process.env.FIREBASE_PRIVATE_KEY || '').replace(/\\n/g, '\n'),
 };

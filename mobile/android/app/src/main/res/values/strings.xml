@@ -30,4 +30,17 @@
     <string name="google_web_client_id" translatable="false">697477474638-hq3pr5dg147kfuikkcfil4ehbic9kse8.apps.googleusercontent.com</string>
 
     <string name="webapp_offline">لا يوجد اتصال بالإنترنت.\nتحقق من الشبكة ثم حاول مجدداً.</string>
+
+    <!--
+      ═══════════════════════════════════════════════════════════
+      إشعارات تطبيق الجوال (Firebase Cloud Messaging)
+      معرّف الخادم (Render) الذي تُسجَّل عنده الأجهزة لاستقبال التنبيه العام.
+      ═══════════════════════════════════════════════════════════
+    -->
+    <string name="api_base_url" translatable="false">https://dealbox-oman-kbr5.onrender.com</string>
+
+    <!-- قناة الإشعارات (تظهر في إعدادات أندرويد) -->
+    <string name="dealbox_channel_id" translatable="false">dealbox_announcements</string>
+    <string name="dealbox_channel_name">تنبيهات DealBox</string>
+    <string name="dealbox_channel_description">إشعارات التنبيه العام من DealBox عُمان</string>
 </resources>

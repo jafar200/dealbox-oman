@@ -4,4 +4,6 @@
     <color name="dealbox_dark">#0b1226</color>
     <color name="dealbox_amber">#fea619</color>
     <color name="dealbox_bg">#faf8ff</color>
+    <!-- لون أيقونة الإشعارات على أندرويد -->
+    <color name="dealbox_notification_color">#006948</color>
 </resources>

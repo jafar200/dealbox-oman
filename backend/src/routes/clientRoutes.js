@@ -1,5 +1,5 @@
 import express from 'express';
-import { getAvailableBoxes, createOrder, getMyOrders, createSupportMessage, getLoyalty, getPublicAnnouncement, getPushPublicKey, subscribePush, unsubscribePush } from '../controllers/clientController.js';
+import { getAvailableBoxes, createOrder, getMyOrders, createSupportMessage, getLoyalty, getPublicAnnouncement, getPushPublicKey, subscribePush, unsubscribePush, registerDevice, unregisterDevice } from '../controllers/clientController.js';
 import { getPublicStories, getPublicStoreBoxes } from '../controllers/storyController.js';
 import { protect } from '../middlewares/authMiddleware.js';
 
@@ -18,5 +18,8 @@ router.get('/announcement', getPublicAnnouncement);
 router.get('/push/public-key', getPushPublicKey);
 router.post('/push/subscribe', subscribePush);
 router.post('/push/unsubscribe', unsubscribePush);
+// إشعارات تطبيق الجوال (FCM) — مسارات عامة
+router.post('/push/register-device', registerDevice);
+router.post('/push/unregister-device', unregisterDevice);
 
 export default router;

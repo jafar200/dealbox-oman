@@ -1,11 +1,14 @@
 package om.dealbox.app;
 
 import android.annotation.SuppressLint;
+import android.Manifest;
 import android.app.Activity;
 import android.content.ActivityNotFoundException;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
@@ -42,6 +45,10 @@ public class MainActivity extends Activity {
 
     private static final String TAG = "DealBox";
     private static final int RC_SIGN_IN = 9001;
+    private static final int RC_NOTIFICATIONS = 9002;
+
+    /** مفتاح الرابط الذي يُفتح عند الضغط على الإشعار (يأتي من FCM). */
+    public static final String EXTRA_OPEN_URL = "dealbox_open_url";
 
     private WebView webView;
     private ProgressBar progressBar;
@@ -55,6 +62,25 @@ public class MainActivity extends Activity {
     /** الرابط الأساسي — يُضبط من strings.xml (انظر README للتفاصيل). */
     private String getStartUrl() {
         return getString(R.string.webapp_url);
+    }
+
+    /** الرابط الابتدائي — إن فُتح التطبيق من إشعار نستخدم رابط الإشعار. */
+    private String resolveStartUrl() {
+        Intent intent = getIntent();
+        String fromNotification = intent != null ? intent.getStringExtra(EXTRA_OPEN_URL) : null;
+        if (fromNotification != null && fromNotification.startsWith("http")) {
+            return fromNotification;
+        }
+        return getStartUrl();
+    }
+
+    /** يطلب صلاحية الإشعارات على أندرويد 13+ (لازمة لعرض الإشعار على شاشة القفل). */
+    private void requestNotificationPermission() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU
+                && checkSelfPermission(Manifest.permission.POST_NOTIFICATIONS)
+                != PackageManager.PERMISSION_GRANTED) {
+            requestPermissions(new String[]{Manifest.permission.POST_NOTIFICATIONS}, RC_NOTIFICATIONS);
+        }
     }
 
     /** واجهة الجسر المكشوفة للواجهة الويب باسم AndroidGoogle */
@@ -185,7 +211,26 @@ public class MainActivity extends Activity {
             webView.loadUrl(getStartUrl());
         });
 
-        webView.loadUrl(getStartUrl());
+        // إشعارات الجوال (FCM): قناة + طلب صلاحية + تسجيل توكن الجهاز.
+        // كلها آمنة حتى بدون Firebase (تتخطّى بهدوء).
+        DealBoxPush.createNotificationChannel(this);
+        requestNotificationPermission();
+        DealBoxPush.registerDevice(this);
+
+        webView.loadUrl(resolveStartUrl());
+    }
+
+    @Override
+    protected void onNewIntent(Intent intent) {
+        super.onNewIntent(intent);
+        setIntent(intent);
+        // فُتح التطبيق من إشعار وهو يعمل بالفعل: انتقل لصفحة التنبيه
+        if (intent != null && webView != null) {
+            String url = intent.getStringExtra(EXTRA_OPEN_URL);
+            if (url != null && url.startsWith("http")) {
+                webView.loadUrl(url);
+            }
+        }
     }
 
     @Override

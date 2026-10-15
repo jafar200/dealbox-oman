@@ -54,6 +54,7 @@ mongodb+srv://<user>:<password>@cluster0.xxxxx.mongodb.net/dealbox_oman
    - `FRONTEND_URL` → ضع مؤقتاً `https://temp.vercel.app` (ستحدّثه بعد الخطوة 4)
    - `JWT_SECRET` → يُولّد تلقائياً
    - `VAPID_PUBLIC_KEY` / `VAPID_PRIVATE_KEY` / `VAPID_SUBJECT` → لإشعارات Web Push (ولّدها بـ `npx web-push generate-vapid-keys --json`). اختيارية: بدونها تُتخطّى الإشعارات بهدوء.
+   - `FIREBASE_PROJECT_ID` / `FIREBASE_CLIENT_EMAIL` / `FIREBASE_PRIVATE_KEY` → لإشعارات تطبيق الجوال (FCM). اختيارية: بدونها تُتخطّى إشعارات التطبيق. القيم من Firebase → Project settings → Service accounts → Generate new private key (انظر `mobile/README.md`).
 4. اضغط **Apply** وانتظر البناء (~3 دقائق)
 5. انسخ رابط الخدمة، سيكون شكله: `https://dealbox-api-xxxx.onrender.com`
 6. تحقق أنه يعمل: افتح `https://dealbox-api-xxxx.onrender.com/api/health` — يجب أن ترى `"status":"ok"`

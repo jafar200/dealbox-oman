@@ -187,6 +187,28 @@
 **الواجهة:** `src/data/webPush.ts` (تسجيل `sw.js` + اشتراك/إلغاء + مزامنة) و`sw.js` في جذر المشروع (يُصدّره `vite.config.ts` لأن `publicDir` معطّل)، مع شريط تفعيل في `src/App.tsx` ومفتاح في `src/components/UserProfileView.tsx`.
 > ملاحظة: لا يعمل داخل WebView تطبيق الأندرويد (أندرويد لا يدعم Push API في WebView)؛ يحتاج متصفحاً حقيقياً.
 
+### 8.2 إشعارات تطبيق الجوال — Firebase (FCM) (`DeviceToken` + API)
+
+لإيصال التنبيه العام كإشعار **نظام** يظهر على شاشة القفل حتى لو كان التطبيق مغلقاً أو الهاتف في وضع السكون (أندرويد عبر FCM، وآيفون عبر APNs من داخل Firebase).
+
+**التخزين (`DeviceToken`)**
+| الحقل (Field) | النوع (Type) | الوصف (Description) |
+|---|---|---|
+| `token` | String (unique) | توكن جهاز FCM (مفتاح فريد) |
+| `platform` | String (`android`/`ios`/`web`) | نوع الجهاز |
+| `userAgent` | String | معلومات الجهاز (اختياري) |
+| `lastSeenAt` | Date | آخر تسجيل للتوكن |
+
+**المسارات (عامة — بدون تسجيل دخول):**
+- `POST /api/v1/client/push/register-device` → يحفظ/يحدّث `{ token, platform }` ويعيد `{ success, fcmEnabled }`.
+- `POST /api/v1/client/push/unregister-device` → يحذف `{ token }`.
+
+**الإرسال:** عند نشر التنبيه (نفس شرط Web Push) يرسل الخادم FCM عبر **HTTP v1** باستخدام حساب خدمة Firebase (تُعاد فيه `google-auth-library` المثبّتة أصلاً). تُحذف التوكنات غير الصالحة (`404`/`UNREGISTERED`) تلقائياً. لا يُعطّل فشل الإشعار عملية النشر.
+> بدون مفاتيح Firebase (`FIREBASE_PROJECT_ID` / `FIREBASE_CLIENT_EMAIL` / `FIREBASE_PRIVATE_KEY`) تُتخطّى الإشعارات بهدوء.
+
+**تطبيق الأندرويد:** `DealBoxMessagingService.java` (يستقبل الرسائل) و`DealBoxPush.java` (قناة الإشعارات + عرضه + تسجيل التوكن في الخادم)، مع ربط تلقائي عبر `google-services.json` (اختياري — بدون الملف يعمل التطبيق عادي بلا FCM).
+
+
 ## 9. إحصائيات الأدمن الحقيقية (`GET /api/v1/admin/analytics` — أدمن فقط)
 
 مسار يُرجع أرقامًا محسوبة مباشرة من قاعدة البيانات (أوامر `Orders` + متاجر `Stores`) بدلاً من أرقام ثابتة/وهمية. تستخدمه لوحة الأدمن العامة (`src/components/AdminDashboardView.tsx`) لعرض المبيعات اليومي/الأسبوعي والرسوم البيانية.

@@ -51,7 +51,33 @@ mobile/
 - للإنتاج: استخدم HTTPS وأوقف `usesCleartextTraffic` في `AndroidManifest.xml` (واحذف `network_security_config.xml` أو اجعله يمنع HTTP)
 - الأيقونة التكيفية (Vector) موجودة — لاستبدالها بأيقونة PNG احترافية ضعها في `mipmap-*/`
 
+### 🔔 إشعارات الهاتف داخل التطبيق (Firebase FCM)
+الإشعارات التي تظهر على **شاشة القفل** حتى لو التطبيق مغلق أو الهاتف في وضع السكون تحتاج Firebase. بدونها يعمل التطبيق عادي لكن لا تصله إشعارات نظام (Web Push لا يعمل داخل WebView).
+
+**الخطوات (مرة واحدة):**
+1. [console.firebase.google.com](https://console.firebase.google.com) → **Add project** (أو اختر مشروع Google Cloud الموجود).
+2. في المشروع → **Add app** → **Android**:
+   - Package name: `om.dealbox.app`
+   - أدخل **SHA-1** الخاص بمفتاح التوقيع (انظر «استخراج بصمة SHA-1» أدناه — أضف sha1 الخاص بـ debug و release).
+3. نزّل **`google-services.json`** وضعه في: `mobile/android/app/google-services.json`
+   > الملف اختياري: وجوده يفعّل الإشعارات تلقائياً، وغيابه يُبقي البناء سليماً بدون FCM.
+4. في Firebase → ⚙️ **Project settings → Service accounts → Generate new private key** (ملف JSON).
+   انسخ منه إلى متغيّرات بيئة **Render**:
+   - `FIREBASE_PROJECT_ID` = `project_id`
+   - `FIREBASE_CLIENT_EMAIL` = `client_email`
+   - `FIREBASE_PRIVATE_KEY` = `private_key` (سطر واحد مع `\n` بدل الأسطر)
+5. أعد بناء التطبيق (Android Studio → Build) وارفع نسخة جديدة للمتجر.
+6. افتح التطبيق → سيطلب **صلاحية الإشعارات** → اقبل. الآن كل تنبيه عام ينشره الأدمن سيظهر كإشعار نظام.
+
+> **آيفون:** نفس مشروع Firebase يخدم iOS أيضاً عبر APNs (يحتاج مفتاح APNs من Apple Developer + مشروع Xcode). حالياً على آيفون يعمل **Web Push** من Safari عند «إضافة إلى الشاشة الرئيسية» (iOS 16.4+) بدون Firebase.
+
+### ⚠️ مشاكل بناء شائعة في Android Studio
+- **`Unsupported class file major version 69`** أو «Java غير متوافق»: Android Studio يستخدم JDK أحدث مما يدعمه Gradle الحالي (Java 25 يحتاج Gradle 9.1+).
+  الحل: **Settings → Build, Execution, Deployment → Build Tools → Gradle → Gradle JDK** → اختر **JDK 17** (أو Download JDK → 17) → Apply ثم Sync.
+- **`File google-services.json is missing`**: الملف **اختياري** في هذا المشروع — يُطبَّق تلقائياً عند وجوده فقط، فلا يفترض ظهور هذا الخطأ.
+
 ---
+
 
 ## 🔐 تسجيل الدخول عبر Google داخل التطبيق (أصلي / Native)
 
@@ -122,6 +148,16 @@ mobile/
 6. في Signing & Capabilities: اختر **Team** (حسابك المدفوع)
 7. **Product → Archive** → **Distribute App** → **App Store Connect** → رفع
 8. أكمل صفحة التطبيق في App Store Connect (لقطات + وصف + سياسة خصوصية) → **إرسال للمراجعة**
+
+### 🔔 إشعارات الآيفون — الوضع الحالي
+- **بدون حساب Apple (يعمل الآن، مجاناً):** إشعارات **Web Push** تظهر على شاشة القفل حتى والتلفون نايم، بشرط أن يضيف المستخدم الموقع من **Safari** عبر **مشاركة → إضافة إلى الشاشة الرئيسية** (iOS 16.4+)، ثم يقبل الإشعارات. هذا مبني ومنشور بالفعل.
+- **تطبيق iOS أصلي (يحتاج ماك + 99$/سنة):** لإشعارات FCM داخل التطبيق:
+  1. في Firebase → **Add app → iOS** → Bundle ID: `om.dealbox.app` → نزّل `GoogleService-Info.plist` وأضفه للمشروع.
+  2. أضف Firebase SDK عبر Swift Package Manager (`firebase-ios-sdk`) → منتج **FirebaseMessaging**.
+  3. في Xcode → Signing & Capabilities → أضف **Push Notifications** + **Background Modes → Remote notifications**.
+  4. في Apple Developer → أنشئ **APNs Auth Key** وارفعه في Firebase → Project settings → Cloud Messaging.
+  5. `Info.plist` يحتوي أصلاً على `UIBackgroundModes = remote-notification` (جاهز في `mobile/ios/Info.plist`).
+  > نفس مفاتيح الخادم (`FIREBASE_*` على Render) تخدم أندرويد وiOS معاً.
 
 ---
 

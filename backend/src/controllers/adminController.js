@@ -6,6 +6,7 @@ import PlatformSetting from '../models/PlatformSetting.js';
 import Order from '../models/Order.js';
 import { getMailStatus } from '../utils/mailer.js';
 import { sendAnnouncementPush } from '../utils/webPush.js';
+import { sendAnnouncementFcm } from '../utils/fcm.js';
 import { ENV } from '../config/env.js';
 import {
   ADMIN_ROLE_KEYS,
@@ -686,6 +687,16 @@ export const updateAnnouncement = async (req, res) => {
         });
       } catch (pushError) {
         console.warn('[DealBox] announcement push failed:', pushError?.message || pushError);
+      }
+      // إشعار تطبيق الجوال (FCM) — يظهر على شاشة القفل حتى لو التطبيق مغلق
+      try {
+        await sendAnnouncementFcm({
+          title: settings.announcementTitle,
+          body: settings.announcementBody,
+          url: `${ENV.FRONTEND_URL}/?portal=client`,
+        });
+      } catch (fcmError) {
+        console.warn('[DealBox] announcement FCM failed:', fcmError?.message || fcmError);
       }
     }
 

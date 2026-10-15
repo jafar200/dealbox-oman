@@ -2,6 +2,15 @@ plugins {
     id 'com.android.application'
 }
 
+// إشعارات Firebase (FCM) فعّالة فقط عند وجود ملف google-services.json.
+// ضع الملف في هذا المجلد (mobile/android/app/google-services.json) من لوحة Firebase.
+if (file('google-services.json').exists()) {
+    apply plugin: 'com.google.gms.google-services'
+    logger.lifecycle('DealBox: google-services.json موجود — تفعيل إشعارات Firebase (FCM).')
+} else {
+    logger.lifecycle('DealBox: google-services.json غير موجود — تخطّي إشعارات Firebase (التطبيق يعمل عادي).')
+}
+
 android {
     namespace 'om.dealbox.app'
     compileSdk 35
@@ -51,6 +60,10 @@ dependencies {
     implementation platform('org.jetbrains.kotlin:kotlin-bom:1.8.22')
     // تسجيل الدخول عبر Google بشكل أصلي (Native) — يعمل داخل WebView
     implementation 'com.google.android.gms:play-services-auth:21.2.0'
+    // إشعارات Firebase Cloud Messaging (تظهر على شاشة القفل حتى لو التطبيق مغلق).
+    // تعمل فقط عند إضافة google-services.json (انظر أعلى الملف).
+    implementation platform('com.google.firebase:firebase-bom:33.7.0')
+    implementation 'com.google.firebase:firebase-messaging'
 }
 
 configurations.all {

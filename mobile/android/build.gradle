@@ -1,4 +1,16 @@
 // ملف Gradle الجذري — المشروع يُفتح مباشرة في Android Studio
+buildscript {
+    repositories {
+        google()
+        mavenCentral()
+    }
+    dependencies {
+        // إضافة Google Services — تُطبَّق في :app فقط عند وجود google-services.json
+        // (إشعارات Firebase). غيابها لا يعطّل البناء.
+        classpath 'com.google.gms:google-services:4.4.2'
+    }
+}
+
 plugins {
     id 'com.android.application' version '8.2.2' apply false
 }

@@ -41,6 +41,13 @@
     <key>UIStatusBarStyle</key>
     <string>UIStatusBarStyleLightContent</string>
 
+    <!-- إشعارات Firebase (FCM) على iOS — تسمح بوصول الإشعار في الخلفية/وضع السكون.
+         مطلوب أيضاً تفعيل Capability «Push Notifications» في Xcode. -->
+    <key>UIBackgroundModes</key>
+    <array>
+        <string>remote-notification</string>
+    </array>
+
     <!-- أمان النقل: HTTPS فقط في الإنتاج.
          للتجربة المحلية (http) أضف استثناء النطاق:
          NSAppTransportSecurity → NSExceptionDomains → 192.168.x.x → NSExceptionAllowsInsecureHTTPLoads = YES -->

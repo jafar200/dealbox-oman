@@ -6,6 +6,7 @@ import SupportMessage from '../models/SupportMessage.js';
 import PlatformSetting from '../models/PlatformSetting.js';
 import { ENV } from '../config/env.js';
 import { getVapidPublicKey, isWebPushConfigured, saveSubscription, removeSubscription } from '../utils/webPush.js';
+import { isFcmConfigured, saveDeviceToken, removeDeviceToken } from '../utils/fcm.js';
 
 // نقطة البداية الافتراضية للمسافات: ولاية السيب (الخوض)، مسقط
 const DEFAULT_ORIGIN = { lat: 23.6139, lng: 58.1963 };
@@ -347,6 +348,45 @@ export const unsubscribePush = async (req, res) => {
     return res.status(200).json({ success: true });
   } catch {
     return res.status(500).json({ success: false, message: 'تعذر إلغاء اشتراك الإشعارات' });
+  }
+};
+
+/**
+ * @desc تسجيل جهاز جوال (توكن FCM) ليستقبل التنبيه العام كإشعار نظام
+ *       يظهر على شاشة القفل حتى لو التطبيق مغلق.
+ * @route POST /api/v1/client/push/register-device  (عام)
+ */
+export const registerDevice = async (req, res) => {
+  const { token, platform } = req.body || {};
+  if (!token || typeof token !== 'string') {
+    return res.status(400).json({ success: false, message: 'توكن الجهاز مطلوب' });
+  }
+  try {
+    await saveDeviceToken({
+      token: token.trim(),
+      platform: platform === 'ios' ? 'ios' : platform === 'web' ? 'web' : 'android',
+      userAgent: req.get('user-agent') || '',
+    });
+    return res.status(200).json({ success: true, fcmEnabled: isFcmConfigured() });
+  } catch {
+    return res.status(500).json({ success: false, message: 'تعذر حفظ توكن الجهاز' });
+  }
+};
+
+/**
+ * @desc إزالة توكن جهاز جوال.
+ * @route POST /api/v1/client/push/unregister-device  (عام)
+ */
+export const unregisterDevice = async (req, res) => {
+  const { token } = req.body || {};
+  if (!token) {
+    return res.status(400).json({ success: false, message: 'توكن الجهاز مطلوب' });
+  }
+  try {
+    await removeDeviceToken(token);
+    return res.status(200).json({ success: true });
+  } catch {
+    return res.status(500).json({ success: false, message: 'تعذر إزالة توكن الجهاز' });
   }
 };
 
