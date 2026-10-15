@@ -33,6 +33,7 @@ import { getWebPushStatus, isWebPushSupported, enableWebPush, syncWebPushSubscri
 import { ApprovedStoreStory, StoreStoryDetailModal } from './components/StoreStoryDetailModal';
 import { DealBoxItem, StoreStory, Reservation, ActiveNavTab, BasketCategory, PortalMode } from './types';
 import { loadProjectLogo, saveProjectLogo } from './logoStorage';
+import { fetchProjectBranding, uploadProjectBranding, deleteProjectBranding } from './data/brandingApi';
 
 type IntroSlideConfig = {
   id: string;
@@ -243,11 +244,23 @@ export default function App() {
 
   useEffect(() => {
     let isActive = true;
-    loadProjectLogo()
-      .then((savedLogo) => {
-        if (isActive && savedLogo) setProjectLogo(savedLogo);
-      })
-      .catch((error) => console.error('Unable to load saved project logo:', error));
+    const loadLogo = async () => {
+      // الشعار الموحّد على الخادم له الأولوية (يظهر على كل الأجهزة).
+      const serverLogo = await fetchProjectBranding().catch(() => '');
+      if (!isActive) return;
+      if (serverLogo) {
+        setProjectLogo(serverLogo);
+        void saveProjectLogo(serverLogo).catch(() => undefined);
+        return;
+      }
+      // احتياطي: الشعار المحفوظ محلياً من نسخة سابقة.
+      const savedLogo = await loadProjectLogo().catch((error) => {
+        console.error('Unable to load saved project logo:', error);
+        return null;
+      });
+      if (isActive && savedLogo) setProjectLogo(savedLogo);
+    };
+    void loadLogo();
     return () => {
       isActive = false;
     };
@@ -314,9 +327,26 @@ export default function App() {
 
   const handleUpdateProjectLogo = async (newLogo: string | null): Promise<boolean> => {
     try {
-      await saveProjectLogo(newLogo);
+      // حذف الشعار → استعادة الافتراضي على الخادم أيضاً.
+      if (newLogo === null) {
+        await deleteProjectBranding().catch(() => undefined);
+        await saveProjectLogo(null);
+        localStorage.removeItem('dealbox_project_logo_v1');
+        setProjectLogo(null);
+        return true;
+      }
+
+      // الشعارات الرمزية (Presets) روابط جاهزة؛ الملفات المرفوعة data URL → تُرفع للخادم.
+      let finalLogo = newLogo;
+      if (newLogo.startsWith('data:')) {
+        const uploaded = await uploadProjectBranding(newLogo);
+        if (!uploaded) return false;
+        finalLogo = uploaded;
+      }
+
+      await saveProjectLogo(finalLogo);
       localStorage.removeItem('dealbox_project_logo_v1');
-      setProjectLogo(newLogo);
+      setProjectLogo(finalLogo);
       return true;
     } catch (error) {
       console.error('Unable to save project logo:', error);

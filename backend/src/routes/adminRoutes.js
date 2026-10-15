@@ -10,6 +10,9 @@ import {
   updateLoyaltySettings,
   getAnnouncement,
   updateAnnouncement,
+  getBrandingSettings,
+  uploadBrandingLogo,
+  deleteBrandingLogo,
   getPasswordResetSettings,
   updatePasswordResetSettings,
   getAdminAnalytics,
@@ -79,6 +82,10 @@ router.get('/loyalty', requirePermissions('settings'), getLoyaltySettings);
 router.patch('/loyalty', requirePermissions('settings'), updateLoyaltySettings);
 router.get('/announcement', requirePermissions('settings'), getAnnouncement);
 router.patch('/announcement', requirePermissions('settings'), updateAnnouncement);
+// شعار المنظومة — يُحفظ على الخادم ليظهر على كل الأجهزة
+router.get('/branding', requirePermissions('settings'), getBrandingSettings);
+router.post('/branding/logo', requirePermissions('settings'), uploadBrandingLogo);
+router.delete('/branding/logo', requirePermissions('settings'), deleteBrandingLogo);
 router.get('/password-reset-settings', requirePermissions('settings'), getPasswordResetSettings);
 router.patch('/password-reset-settings', requirePermissions('settings'), updatePasswordResetSettings);
 

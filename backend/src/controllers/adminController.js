@@ -7,6 +7,7 @@ import Order from '../models/Order.js';
 import { getMailStatus } from '../utils/mailer.js';
 import { sendAnnouncementPush } from '../utils/webPush.js';
 import { sendAnnouncementFcm } from '../utils/fcm.js';
+import { createImageUploader, resolveUploadedUrl, IMAGE_MIME_ERROR } from '../utils/imageUpload.js';
 import { ENV } from '../config/env.js';
 import {
   ADMIN_ROLE_KEYS,
@@ -18,6 +19,7 @@ import {
 const LOYALTY_KEY = 'loyalty';
 const ANNOUNCEMENT_KEY = 'announcement';
 const PASSWORD_RESET_KEY = 'password-reset';
+const BRANDING_KEY = 'branding';
 
 /**
  * Super Admin Controller for DealBox Sultanate of Oman
@@ -754,6 +756,84 @@ export const updatePasswordResetSettings = async (req, res) => {
     });
   } catch {
     return res.status(500).json({ success: false, message: 'تعذر حفظ إعدادات استعادة كلمة المرور' });
+  }
+};
+
+/** رافع شعار المنظومة (شعار واحد فقط). */
+const brandingLogoUpload = createImageUploader({
+  diskDir: 'uploads/branding',
+  filenameFn: (_req, file, cb) => {
+    const ext = (file.originalname.match(/\.[a-z0-9]+$/i) || ['.png'])[0].toLowerCase();
+    cb(null, `dealbox-logo-${Date.now()}${ext}`);
+  },
+});
+
+/**
+ * @desc جلب شعار المنظومة المحفوظ على الخادم.
+ * @route GET /api/v1/admin/branding
+ */
+export const getBrandingSettings = async (req, res) => {
+  try {
+    const settings = await PlatformSetting.findOne({ key: BRANDING_KEY }).lean();
+    return res.status(200).json({ success: true, logoUrl: settings?.projectLogoUrl || '' });
+  } catch {
+    return res.status(500).json({ success: false, message: 'تعذر جلب شعار المنظومة' });
+  }
+};
+
+/**
+ * @desc رفع/حفظ شعار المنظومة على الخادم (يظهر على كل الأجهزة).
+ * @route POST /api/v1/admin/branding/logo   (multipart: image)
+ */
+export const uploadBrandingLogo = (req, res) => {
+  brandingLogoUpload.single('image')(req, res, async (err) => {
+    if (err) {
+      const msg = err.message === IMAGE_MIME_ERROR
+        ? err.message
+        : 'تعذر رفع الصورة — تأكد أن حجمها أقل من 5 ميغابايت';
+      return res.status(400).json({ success: false, message: msg });
+    }
+    if (!req.file) {
+      return res.status(400).json({ success: false, message: 'لم يتم اختيار صورة' });
+    }
+
+    let url;
+    try {
+      url = await resolveUploadedUrl(req.file, {
+        cloudFolder: 'dealbox/branding',
+        localPrefix: '/uploads/branding',
+      });
+    } catch {
+      return res.status(500).json({ success: false, message: 'تعذر رفع الصورة إلى التخزين الخارجي' });
+    }
+
+    try {
+      await PlatformSetting.findOneAndUpdate(
+        { key: BRANDING_KEY },
+        { $set: { projectLogoUrl: url } },
+        { new: true, upsert: true },
+      );
+      return res.status(200).json({ success: true, logoUrl: url });
+    } catch {
+      return res.status(500).json({ success: false, message: 'تعذر حفظ شعار المنظومة' });
+    }
+  });
+};
+
+/**
+ * @desc استعادة الشعار الافتراضي (حذف شعار المنظومة من الخادم).
+ * @route DELETE /api/v1/admin/branding/logo
+ */
+export const deleteBrandingLogo = async (req, res) => {
+  try {
+    await PlatformSetting.findOneAndUpdate(
+      { key: BRANDING_KEY },
+      { $set: { projectLogoUrl: '' } },
+      { new: true, upsert: true },
+    );
+    return res.status(200).json({ success: true, logoUrl: '' });
+  } catch {
+    return res.status(500).json({ success: false, message: 'تعذر حذف شعار المنظومة' });
   }
 };
 

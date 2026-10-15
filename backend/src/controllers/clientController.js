@@ -302,6 +302,22 @@ export const getPublicAnnouncement = async (req, res) => {
 };
 
 /**
+ * @desc شعار المنظومة الموحّد (يُحفظ على الخادم ويظهر على كل الأجهزة).
+ * @route GET /api/v1/client/branding  (عام)
+ */
+export const getPublicBranding = async (req, res) => {
+  try {
+    const settings = await PlatformSetting.findOne({ key: 'branding' }).lean();
+    return res.status(200).json({
+      success: true,
+      logoUrl: settings?.projectLogoUrl || '',
+    });
+  } catch {
+    return res.status(500).json({ success: false, message: 'تعذر جلب شعار المنظومة' });
+  }
+};
+
+/**
  * @desc VAPID public key for browser push subscriptions.
  * @route GET /api/v1/client/push/public-key  (public)
  */

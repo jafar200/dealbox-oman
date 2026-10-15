@@ -208,6 +208,28 @@
 
 **تطبيق الأندرويد:** `DealBoxMessagingService.java` (يستقبل الرسائل) و`DealBoxPush.java` (قناة الإشعارات + عرضه + تسجيل التوكن في الخادم)، مع ربط تلقائي عبر `google-services.json` (اختياري — بدون الملف يعمل التطبيق عادي بلا FCM).
 
+### 8.3 شعار المنظومة الموحّد (`PlatformSetting` + API)
+
+شعار واحد للمنظومة **يُحفظ على الخادم** ليظهر على كل الأجهزة (الموقع + تطبيق الجوال) وليس على متصفح الأدمن فقط.
+
+**التخزين (`PlatformSetting`)**
+تُخزَّن تحت مفتاح `key: 'branding'`:
+
+| الحقل (Field) | النوع (Type) | الوصف (Description) |
+|---|---|---|
+| `projectLogoUrl` | String | رابط الشعار الدائم (Cloudinary عند التفعيل، وإلا `/uploads/branding/...`) — فارغ = الشعار الافتراضي |
+
+**المسارات:**
+| المسار | الصلاحية | الوصف |
+|---|---|---|
+| `GET /api/v1/client/branding` | عام | `{ success, logoUrl }` — تجلبه الواجهة عند الإقلاع |
+| `GET /api/v1/admin/branding` | `settings` | حالة الشعار الحالية |
+| `POST /api/v1/admin/branding/logo` | `settings` | رفع شعار (`multipart: image`, ≤5MB) → `{ success, logoUrl }` |
+| `DELETE /api/v1/admin/branding/logo` | `settings` | استعادة الافتراضي (تفريغ `projectLogoUrl`) |
+
+**الواجهة:** `src/data/brandingApi.ts` (`fetchProjectBranding` / `uploadProjectBranding` / `deleteProjectBranding`)، و`src/App.tsx` يجلب الشعار من الخادم عند الإقلاع (وله الأولوية على النسخة المحلية في IndexedDB)، ويرفعه عند حفظه من `src/components/AdminSystemSettingsView.tsx`.
+> سابقاً كان الشعار يُحفظ في IndexedDB محلياً فقط، فلم يكن يظهر على الهواتف أو أي جهاز آخر.
+
 
 ## 9. إحصائيات الأدمن الحقيقية (`GET /api/v1/admin/analytics` — أدمن فقط)
 

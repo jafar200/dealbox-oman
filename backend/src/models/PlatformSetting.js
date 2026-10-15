@@ -16,6 +16,8 @@ const platformSettingSchema = new mongoose.Schema(
     announcementPublishedAt: { type: Date, default: null },
     // استعادة كلمة المرور («نسيت كلمة المرور») — تفعيل/إيقاف من إعدادات النظام
     passwordResetEnabled: { type: Boolean, default: true },
+    // شعار المنظومة الموحّد — يُحفظ على الخادم ليظهر على كل الأجهزة (موقع/تطبيق)
+    projectLogoUrl: { type: String, trim: true, default: '' },
   },
   { timestamps: true }
 );
