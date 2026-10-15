@@ -1,6 +1,8 @@
 import multer from 'multer';
 import fs from 'node:fs';
 import { isCloudinaryEnabled, uploadBufferToCloudinary } from '../config/cloudinary.js';
+import { isB2Enabled } from '../config/b2.js';
+import { uploadBufferToB2 } from './uploadToB2.js';
 
 export const ALLOWED_IMAGE_MIMES = [
   'image/png',
@@ -10,8 +12,8 @@ export const ALLOWED_IMAGE_MIMES = [
   'image/webp',
   'image/svg+xml',
 ];
-export const MAX_IMAGE_BYTES = 5 * 1024 * 1024; // 5 ميغابايت
-export const IMAGE_MIME_ERROR = 'نوع الصورة غير مدعوم — استخدم PNG أو JPG أو GIF أو WebP أو SVG';
+export const MAX_IMAGE_BYTES = 5 * 1024 * 1024; // 5 ????????
+export const IMAGE_MIME_ERROR = '??? ?????? ??? ????? � ?????? PNG ?? JPG ?? GIF ?? WebP ?? SVG';
 
 const imageFileFilter = (_req, file, cb) => {
   if (!ALLOWED_IMAGE_MIMES.includes(file.mimetype)) {
@@ -22,12 +24,13 @@ const imageFileFilter = (_req, file, cb) => {
 };
 
 /**
- * وسيط رفع موحّد:
- * - عند تفعيل Cloudinary → تخزين مؤقت في الذاكرة ثم رفع خارجي دائم.
- * - بدونه → تخزين على القرص المحلي (وضع التطوير).
+ * ???? ??? ?????:
+ * - ??? ????? B2 ? ????? ???? ?? ??????? ?? ??? ??? B2
+ * - ??? ??? ??????? ????? Cloudinary
+ * - ???? ? ????? ??? ????? ?????? (???????)
  */
 export const createImageUploader = ({ diskDir, filenameFn }) => {
-  const storage = isCloudinaryEnabled()
+  const storage = isB2Enabled() || isCloudinaryEnabled()
     ? multer.memoryStorage()
     : multer.diskStorage({
       destination: (_req, _file, cb) => {
@@ -45,14 +48,18 @@ export const createImageUploader = ({ diskDir, filenameFn }) => {
 };
 
 /**
- * تحويل الملف المرفوع إلى رابط عام:
- * - ملف من الذاكرة → يُرفع إلى Cloudinary ويُعاد رابط CDN الدائم.
- * - ملف من القرص → يُعاد المسار المحلي `/uploads/...`.
+ * ????? ????? ??????? ??? ???? ???
  */
-export const resolveUploadedUrl = async (file, { cloudFolder, localPrefix }) => {
-  if (!file) throw new Error('لم يتم اختيار صورة');
+export const resolveUploadedUrl = async (file, { cloudFolder, localPrefix, key }) => {
+  if (!file) throw new Error('?? ??? ?????? ????');
   if (file.buffer) {
-    return uploadBufferToCloudinary(file.buffer, { folder: cloudFolder });
+    if (isB2Enabled()) {
+      return uploadBufferToB2(file.buffer, { folder: cloudFolder || 'dealbox', key });
+    }
+    if (isCloudinaryEnabled()) {
+      return uploadBufferToCloudinary(file.buffer, { folder: cloudFolder || 'dealbox' });
+    }
+    throw new Error('?? ???? ????? ????? ??????');
   }
   return `${localPrefix}/${file.filename}`;
 };

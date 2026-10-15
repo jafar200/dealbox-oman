@@ -1,0 +1,13 @@
+
+      # Backblaze B2
+      - key: B2_KEY_ID
+        sync: false
+      - key: B2_APPLICATION_KEY
+        sync: false
+      - key: B2_BUCKET_NAME
+        sync: false
+      - key: B2_ENDPOINT
+        sync: false
+      - key: B2_PUBLIC_URL
+        sync: false
+
