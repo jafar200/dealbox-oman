@@ -25,18 +25,21 @@ const imageFileFilter = (_req, file, cb) => {
 /**
  * وسيط رفع موحّد:
  * - عند تفعيل Backblaze B2 → تخزين مؤقت في الذاكرة ثم رفع دائم إلى B2.
- * - بدونه → تخزين على القرص المحلي (وضع التطوير فقط؛ قرص Render مؤقت).
+ * - بدون B2 في الإنتاج → الذاكرة أيضاً (حتى لا نحفظ روابط مؤقتة على قرص Render)
+ *   فيتولّى كل مسار احتياطه الخاص (data URL للشعار، أو خطأ واضح لغيره).
+ * - في التطوير فقط → تخزين على القرص المحلي.
  */
 export const createImageUploader = ({ diskDir, filenameFn }) => {
-  const storage = isB2Enabled()
-    ? multer.memoryStorage()
-    : multer.diskStorage({
+  const useLocalDisk = !isB2Enabled() && process.env.NODE_ENV !== 'production';
+  const storage = useLocalDisk
+    ? multer.diskStorage({
       destination: (_req, _file, cb) => {
         fs.mkdirSync(diskDir, { recursive: true });
         cb(null, diskDir);
       },
       filename: (req, file, cb) => filenameFn(req, file, cb),
-    });
+    })
+    : multer.memoryStorage();
 
   return multer({
     storage,
